@@ -1,141 +1,235 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>מערכת ניהול מלאי חכמה</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מערכת ניהול מלאי חכמה</title>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(circle at top,#1e1b4b,#0f172a 60%);color:#f8fafc;font-family:Segoe UI,Tahoma,Arial,sans-serif;min-height:100vh;padding-bottom:50px}
+header{background:linear-gradient(135deg,#1e1b4bf2,#312e81f2);padding:20px 35px;position:sticky;top:0;z-index:10;box-shadow:0 10px 30px #0005}
+.header{max-width:1200px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}
+h1{margin:0;font-size:1.5rem}
+.subtitle{color:#c7d2fe;font-size:.85rem;margin-top:4px}
+#status{font-size:.8rem;color:#fbbf24;margin-top:6px;font-weight:bold}
+.container{max-width:1200px;margin:22px auto;padding:0 18px}
+.card{background:#1e293be6;border:1px solid #6366f166;border-radius:16px;padding:22px;margin-bottom:22px;box-shadow:0 10px 25px #0005}
+.title{font-size:1.15rem;font-weight:700;margin-bottom:15px}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;align-items:end}
+.group{display:flex;flex-direction:column;gap:5px}
+label{font-size:.8rem;color:#cbd5e1;font-weight:600}
+input,select{width:100%;padding:11px;background:#0f172a;color:white;border:1px solid #475569;border-radius:8px}
+input:focus,select:focus{outline:none;border-color:#818cf8}
+button{cursor:pointer}
+button:disabled{opacity:.6;cursor:wait}
+.primary{padding:11px;border:0;border-radius:8px;background:#6366f1;color:white;font-weight:bold}
+.export{padding:10px 15px;border:0;border-radius:8px;background:#059669;color:white;font-weight:bold}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:20px}
+.stat{background:#1e293bd9;border:1px solid #334155;border-radius:14px;padding:17px}
+.stat.click{cursor:pointer}
+.stat.click:hover{border-color:#6366f1}
+.stat-label{font-size:.8rem;color:#94a3b8}
+.stat-value{font-size:1.6rem;font-weight:800;margin-top:5px}
+.filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.search{flex:1;min-width:220px}
+.chips{display:flex;gap:5px;flex-wrap:wrap}
+.chip{padding:8px 12px;border-radius:18px;background:#1e293b;color:#94a3b8;border:1px solid #334155}
+.chip.active{background:#6366f1;color:white}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:15px}
+.item{background:#1e293be6;border:1px solid #334155;border-radius:14px;padding:15px}
+.item.low-item{border-color:#ef444488}
+.item-header{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;border-bottom:1px solid #334155;padding-bottom:9px;margin-bottom:10px}
+.name{font-size:1.08rem;font-weight:bold}
+.badge{display:inline-block;margin-top:5px;font-size:.72rem;padding:3px 7px;border-radius:5px;background:#312e81;color:#c7d2fe}
+.ok{color:#34d399;font-weight:bold;font-size:.75rem}
+.low{color:#f87171;font-weight:bold;font-size:.75rem}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:9px 0;color:#94a3b8;font-size:.85rem}
+.qty{font-size:1.2rem;font-weight:bold}
+.actions{background:#0f172a;padding:9px;border-radius:8px;margin:10px 0}
+.action-inputs,.action-buttons{display:flex;gap:6px;margin-top:6px}
+.plus,.minus,.edit,.delete,.save,.cancel{padding:7px 9px;border-radius:6px;font-weight:600}
+.plus,.save{background:#10b981;color:white;border:0;flex:1}
+.minus{background:#ef4444;color:white;border:0;flex:1}
+.edit{background:#3730a3;color:#c7d2fe;border:1px solid #6366f1}
+.delete,.cancel{background:#7f1d1d;color:#fecaca;border:1px solid #ef444466}
+.history{background:#0f172a;padding:8px;border-radius:7px;font-size:.76rem;color:#cbd5e1;margin-top:7px}
+.editbox{background:#0f172a;padding:11px;border-radius:9px;border:1px solid #6366f1;display:flex;flex-direction:column;gap:8px}
+.empty{text-align:center;grid-column:1/-1;padding:35px;color:#94a3b8}
+.modal{display:none;position:fixed;inset:0;background:#0f172add;z-index:100;align-items:center;justify-content:center;padding:15px}
+.modal.show{display:flex}
+.modalbox{width:90%;max-width:550px;max-height:80vh;overflow:auto;background:#1e293b;border:1px solid #6366f1;border-radius:14px;padding:18px}
+.modalitem{background:#0f172a;border:1px solid #ef444466;border-radius:8px;padding:11px;margin-top:8px;display:flex;justify-content:space-between;gap:8px}
+.toast{position:fixed;left:20px;bottom:20px;background:#059669;color:white;padding:11px 16px;border-radius:9px;z-index:200;font-weight:bold}
+.toast.error{background:#dc2626}
+@media(max-width:650px){header{padding:15px}.container{padding:0 10px}.action-inputs,.action-buttons{flex-direction:column}}
+</style>
+</head>
 
-    body {
-      margin: 0;
-      padding: 0 0 50px;
-      min-height: 100vh;
-      background: radial-gradient(circle at top, #1e1b4b 0%, #0f172a 60%);
-      color: #f8fafc;
-      font-family: "Segoe UI", Tahoma, Arial, sans-serif;
-    }
+<body>
 
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      padding: 20px 40px;
-      background: linear-gradient(
-        135deg,
-        rgba(30, 27, 75, 0.96),
-        rgba(49, 46, 129, 0.96)
-      );
-      border-bottom: 1px solid rgba(99, 102, 241, 0.3);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    }
+<header>
+<div class="header">
+  <div>
+    <h1>📦 ניהול מלאי חכם</h1>
+    <div class="subtitle">מערכת מלאי משותפת בענן</div>
+    <div id="status">🟡 מתחבר ל-Supabase...</div>
+  </div>
 
-    .header-content {
-      max-width: 1200px;
-      margin: auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 15px;
-      flex-wrap: wrap;
-    }
+  <button class="export" onclick="exportCSV()">📥 ייצוא לאקסל</button>
+</div>
+</header>
 
-    h1 {
-      margin: 0 0 4px;
-      font-size: 1.55rem;
-    }
+<div class="container">
 
-    p {
-      margin: 0;
-      color: #c7d2fe;
-      font-size: 0.85rem;
-    }
+<div class="card">
+  <div class="title">➕ הוספת פריט חדש למלאי</div>
 
-    #connectionStatus {
-      margin-top: 6px;
-      font-size: 0.78rem;
-      font-weight: 700;
-      color: #fbbf24;
-    }
+  <form id="addForm" class="form">
 
-    .container {
-      max-width: 1200px;
-      margin: 22px auto;
-      padding: 0 20px;
-    }
+    <div class="group">
+      <label>שם הפריט</label>
+      <input id="newName" required placeholder="לדוגמה: דפי A4">
+    </div>
 
-    .card {
-      background: rgba(30, 41, 59, 0.9);
-      border: 1px solid rgba(99, 102, 241, 0.45);
-      border-radius: 16px;
-      padding: 22px;
-      margin-bottom: 22px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
-    }
+    <div class="group">
+      <label>קטגוריה</label>
+      <select id="newCategory">
+        <option value="ציוד משרדי">ציוד משרדי</option>
+        <option value="נייר ודפוס">נייר ודפוס</option>
+        <option value="אחזקה וניקיון">אחזקה וניקיון</option>
+        <option value="אחר">אחר</option>
+      </select>
+    </div>
 
-    .section-title {
-      font-size: 1.15rem;
-      font-weight: 800;
-      margin-bottom: 16px;
-    }
+    <div class="group">
+      <label>כמות התחלתית</label>
+      <input id="newQuantity" type="number" value="0" min="0" required>
+    </div>
 
-    .form {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
-      align-items: end;
-      gap: 12px;
-    }
+    <div class="group">
+      <label>מינימום התראה</label>
+      <input id="newMin" type="number" value="5" min="0">
+    </div>
 
-    .input-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
+    <div class="group">
+      <label>מחיר יחידה ₪</label>
+      <input id="newPrice" type="number" value="0" min="0" step="0.01">
+    </div>
 
-    label {
-      color: #cbd5e1;
-      font-size: 0.8rem;
-      font-weight: 700;
-    }
+    <button id="addButton" class="primary" type="submit">הוסף פריט</button>
+  </form>
+</div>
 
-    input,
-    select {
-      width: 100%;
-      padding: 11px;
-      border: 1px solid rgba(99, 102, 241, 0.5);
-      border-radius: 8px;
-      background: #0f172a;
-      color: #fff;
-      font-size: 0.92rem;
-    }
+<div class="stats">
 
-    input:focus,
-    select:focus {
-      outline: none;
-      border-color: #818cf8;
-      box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.15);
-    }
+  <div class="stat">
+    <div class="stat-label">📦 סה"כ יחידות במלאי</div>
+    <div class="stat-value" id="totalCount">0</div>
+  </div>
 
-    button {
-      font-family: inherit;
-      cursor: pointer;
-    }
+  <div class="stat click" onclick="openLowStock()">
+    <div class="stat-label">⚠️ פריטים במלאי נמוך</div>
+    <div class="stat-value" id="lowCount">0</div>
+  </div>
 
-    button:disabled {
-      cursor: wait;
-      opacity: 0.55;
-    }
+  <div class="stat">
+    <div class="stat-label">💰 שווי כולל של המלאי</div>
+    <div class="stat-value" id="totalValue">₪0.00</div>
+  </div>
 
-    .primary-btn {
-      width: 100%;
-      padding: 12px;
-      border: 0;
-      border-radius: 8px;
-      background: linear-gradient(135deg, #6366f1, #4f46e5);
-      color: white;
-      font-weight
+</div>
+
+<div class="filters">
+
+  <input id="search" class="search" placeholder="🔍 חיפוש פריט..." oninput="render()">
+
+  <div class="chips">
+    <button type="button" class="chip active" onclick="setCategory('הכל',this)">הכל</button>
+    <button type="button" class="chip" onclick="setCategory('ציוד משרדי',this)">ציוד משרדי</button>
+    <button type="button" class="chip" onclick="setCategory('נייר ודפוס',this)">נייר ודפוס</button>
+    <button type="button" class="chip" onclick="setCategory('אחזקה וניקיון',this)">אחזקה וניקיון</button>
+    <button type="button" class="chip" onclick="setCategory('אחר',this)">אחר</button>
+  </div>
+
+</div>
+
+<div id="items" class="grid">
+  <div class="empty">טוען מלאי...</div>
+</div>
+
+</div>
+
+<div id="lowModal" class="modal" onclick="modalBackgroundClick(event)">
+  <div class="modalbox">
+
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <strong style="color:#f87171">⚠️ פריטים במלאי נמוך</strong>
+      <button type="button" class="cancel" onclick="closeLowStock()">✕</button>
+    </div>
+
+    <div id="lowModalBody"></div>
+
+  </div>
+</div>
+
+
+<script>
+
+/* =========================================================
+   SUPABASE
+========================================================= */
+
+const SUPABASE_URL = 'https://wsxwrzmrzrwcnwowsgve.supabase.co';
+
+const SUPABASE_KEY =
+  'sb_publishable_5Wh7wSRJIXOg4nqLhLyTmg_2Ny1OJ7l';
+
+const db = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+
+/* =========================================================
+   APP STATE
+========================================================= */
+
+let inventory = [];
+let currentCategory = 'הכל';
+let editingId = null;
+
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function escapeHTML(value) {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
+
+function showToast(message, isError = false) {
+
+  const old = document.querySelector('.toast');
+
+  if (old) {
+    old.remove();
+  }
+
+  const toast = document.createElement('div');
+
+  toast.className = isError
+    ? 'toast error'
+    : 'toast';
+
+  toast.textContent = message;
+
+  document.
