@@ -1,57 +1,86 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>מערכת ניהול מלאי חכמה</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>מערכת ניהול מלאי חכמה</title>
 
-    <!-- Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <style>
-        * { box-sizing: border-box; }
+  <style>
+    * { box-sizing: border-box; }
 
-        body {
-            margin: 0;
-            padding: 0 0 50px;
-            background: radial-gradient(circle at top, #1e1b4b 0%, #0f172a 60%);
-            color: #f8fafc;
-            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            min-height: 100vh;
-        }
+    body {
+      margin: 0;
+      padding: 0 0 50px;
+      background: radial-gradient(circle at top, #1e1b4b 0%, #0f172a 60%);
+      color: #f8fafc;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+    }
 
-        header {
-            background: linear-gradient(135deg, rgba(30,27,75,.9), rgba(49,46,129,.9));
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(99,102,241,.2);
-            padding: 20px 40px;
-            box-shadow: 0 10px 30px rgba(0,0,0,.3);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
+    header {
+      background: linear-gradient(135deg, rgba(30,27,75,.95), rgba(49,46,129,.95));
+      border-bottom: 1px solid rgba(99,102,241,.25);
+      padding: 20px 40px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.3);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
 
-        .header-content {
-            max-width: 1200px;
-            margin: auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 16px;
-        }
+    .header-content {
+      max-width: 1200px;
+      margin: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
 
-        h1 {
-            font-size: 1.5rem;
-            font-weight: 800;
-            margin: 0 0 4px;
-        }
+    h1 { margin: 0 0 4px; font-size: 1.5rem; }
+    p { margin: 0; color: #c7d2fe; font-size: .85rem; }
 
-        p {
-            color: #c7d2fe;
-            font-size: .85rem;
-            margin: 0;
-        }
+    .connection {
+      margin-top: 5px;
+      font-size: .75rem;
+      color: #fbbf24;
+    }
 
-        .connection {
-            display
+    .container {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 0 20px;
+    }
+
+    .card {
+      background: rgba(30,41,59,.9);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 25px;
+      border: 1px solid rgba(99,102,241,.4);
+      box-shadow: 0 10px 25px rgba(0,0,0,.35);
+    }
+
+    .section-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .form {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px,1fr));
+      gap: 14px;
+      align-items: end;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-size:
