@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מערכת ניהול מלאי חכמה</title>
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 0 0 50px;
+            background: radial-gradient(circle at top, #1e1b4b 0%, #0f172a 60%);
+            color: #f8fafc;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+
+        header {
+            background: linear-gradient(135deg, rgba(30,27,75,.9), rgba(49,46,129,.9));
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(99,102,241,.2);
+            padding: 20px 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin: 0 0 4px;
+        }
+
+        p {
+            color: #c7d2fe;
+            font-size: .85rem;
+            margin: 0;
+        }
+
+        .connection {
+            display
