@@ -1,409 +1,370 @@
-const SUPABASE_URL = 'https://wsxwrzmrzrwcnwowsgve.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_5Wh7wSRJIXOg4nqLhLyTmg_2Ny1OJ7l';
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מערכת ניהול מלאי חכמה</title>
 
-const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-let inventory = [];
-let currentCategory = 'הכל';
-let editingId = null;
-
-function fromDB(row) {
-    return {
-        id: Number(row.id),
-        name: row.name || '',
-        category: row.category || 'אחר',
-        quantity: Number(row.quantity || 0),
-        minStock: Number(row.min_stock || 0),
-        lastPrice: Number(row.last_price || 0),
-        prevPrice: Number(row.prev_price || 0),
-        totalConsumed: Number(row.total_consumed || 0),
-        lastDate: row.last_date || 'טרם עודכן'
-    };
-}
-
-async function loadInventory() {
-    const status = document.getElementById('dbStatus');
-
-    if (status) {
-        status.textContent = '🟡 מתחבר ל-Supabase...';
-    }
-
-    const { data, error } = await db
-        .from('inventory')
-        .select('*')
-        .order('id', { ascending: false });
-
-    if (error) {
-        console.error('Supabase load error:', error);
-
-        if (status) {
-            status.textContent = '🔴 שגיאה בחיבור ל-Supabase';
-            status.style.color = '#f87171';
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: radial-gradient(circle at top, #1e1b4b 0%, #0f172a 60%);
+            color: #f8fafc;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            padding-bottom: 50px;
         }
 
-        return;
-    }
+        * { box-sizing: border-box; }
 
-    inventory = (data || []).map(fromDB);
-
-    if (status) {
-        status.textContent = '🟢 מחובר ל-Supabase';
-        status.style.color = '#34d399';
-    }
-
-    render();
-}
-
-async function addItem(e) {
-    e.preventDefault();
-
-    const newItem = {
-        name: document.getElementById('newName').value.trim(),
-        category: document.getElementById('newCategory').value,
-        quantity: parseInt(document.getElementById('newQuantity').value) || 0,
-        min_stock: parseInt(document.getElementById('newMin').value) || 5,
-        last_price: parseFloat(document.getElementById('newPrice').value) || 0,
-        prev_price: 0,
-        total_consumed: 0,
-        last_date: 'טרם עודכן'
-    };
-
-    if (!newItem.name) {
-        alert('שם הפריט לא יכול להיות ריק');
-        return;
-    }
-
-    const { error } = await db
-        .from('inventory')
-        .insert(newItem);
-
-    if (error) {
-        console.error('Supabase insert error:', error);
-        alert('שגיאה בהוספת הפריט: ' + error.message);
-        return;
-    }
-
-    e.target.reset();
-
-    document.getElementById('newQuantity').value = '0';
-    document.getElementById('newMin').value = '5';
-    document.getElementById('newPrice').value = '';
-
-    document.getElementById('newName').focus();
-
-    await loadInventory();
-}
-
-async function deleteItem(id) {
-    if (!confirm('האם למחוק את הפריט לצמיתות?')) {
-        return;
-    }
-
-    const { error } = await db
-        .from('inventory')
-        .delete()
-        .eq('id', id);
-
-    if (error) {
-        console.error('Supabase delete error:', error);
-        alert('שגיאה במחיקת הפריט: ' + error.message);
-        return;
-    }
-
-    if (editingId === id) {
-        editingId = null;
-    }
-
-    await loadInventory();
-}
-
-function toggleEdit(id) {
-    editingId = editingId === id ? null : id;
-    render();
-}
-
-async function saveEdit(id) {
-    const newName = document.getElementById('edit_name_' + id).value.trim();
-    const newCat = document.getElementById('edit_cat_' + id).value;
-    const newMin = parseInt(document.getElementById('edit_min_' + id).value) || 0;
-
-    if (!newName) {
-        alert('שם הפריט לא יכול להיות ריק');
-        return;
-    }
-
-    const { error } = await db
-        .from('inventory')
-        .update({
-            name: newName,
-            category: newCat,
-            min_stock: newMin
-        })
-        .eq('id', id);
-
-    if (error) {
-        console.error('Supabase edit error:', error);
-        alert('שגיאה בעריכת הפריט: ' + error.message);
-        return;
-    }
-
-    editingId = null;
-
-    await loadInventory();
-}
-
-async function updateField(id, field, val) {
-    const item = inventory.find(i => i.id === id);
-
-    if (!item) return;
-
-    const numericVal = val === '' ? 0 : parseFloat(val) || 0;
-
-    if (field === 'lastPrice') {
-        const updateData = {
-            last_price: numericVal
-        };
-
-        if (numericVal !== item.lastPrice) {
-            updateData.prev_price = item.lastPrice;
+        header {
+            background: linear-gradient(135deg, rgba(30, 27, 75, 0.9) 0%, rgba(49, 46, 129, 0.9) 100%);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+            padding: 20px 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
-        const { error } = await db
-            .from('inventory')
-            .update(updateData)
-            .eq('id', id);
-
-        if (error) {
-            console.error('Supabase price update error:', error);
-            alert('שגיאה בעדכון המחיר: ' + error.message);
-            return;
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
         }
 
-        await loadInventory();
-    }
-}
-
-async function addStock(id) {
-    const qtyInput = document.getElementById('qty_' + id);
-    const priceInput = document.getElementById('price_' + id);
-
-    const amount = parseInt(qtyInput.value) || 0;
-    const newPrice = parseFloat(priceInput.value);
-
-    if (amount <= 0) {
-        alert('אנא הזן כמות חיובית להוספה');
-        return;
-    }
-
-    const item = inventory.find(i => i.id === id);
-
-    if (!item) return;
-
-    const now = new Date();
-
-    const updateData = {
-        quantity: item.quantity + amount,
-        last_date:
-            'הוספה: ' +
-            now.toLocaleDateString('he-IL') +
-            ' ' +
-            now.toLocaleTimeString(
-                'he-IL',
-                { hour: '2-digit', minute: '2-digit' }
-            )
-    };
-
-    if (
-        !isNaN(newPrice) &&
-        newPrice >= 0 &&
-        newPrice !== item.lastPrice
-    ) {
-        updateData.prev_price = item.lastPrice;
-        updateData.last_price = newPrice;
-    }
-
-    const { error } = await db
-        .from('inventory')
-        .update(updateData)
-        .eq('id', id);
-
-    if (error) {
-        console.error('Supabase add stock error:', error);
-        alert('שגיאה בהוספת הסחורה: ' + error.message);
-        return;
-    }
-
-    qtyInput.value = '';
-    priceInput.value = '';
-
-    await loadInventory();
-}
-
-async function deductStock(id) {
-    const qtyInput = document.getElementById('qty_' + id);
-    const amount = parseInt(qtyInput.value) || 0;
-
-    if (amount <= 0) {
-        alert('אנא הזן כמות חיובית להורדה');
-        return;
-    }
-
-    const item = inventory.find(i => i.id === id);
-
-    if (!item) return;
-
-    if (item.quantity < amount) {
-        alert('אין מספיק יחידות במלאי לפעולה זו!');
-        return;
-    }
-
-    const now = new Date();
-
-    const { error } = await db
-        .from('inventory')
-        .update({
-            quantity: item.quantity - amount,
-            total_consumed: (item.totalConsumed || 0) + amount,
-            last_date:
-                'הורדה: ' +
-                now.toLocaleDateString('he-IL') +
-                ' ' +
-                now.toLocaleTimeString(
-                    'he-IL',
-                    { hour: '2-digit', minute: '2-digit' }
-                )
-        })
-        .eq('id', id);
-
-    if (error) {
-        console.error('Supabase deduct stock error:', error);
-        alert('שגיאה בהורדת הסחורה: ' + error.message);
-        return;
-    }
-
-    qtyInput.value = '';
-
-    const priceInput = document.getElementById('price_' + id);
-
-    if (priceInput) {
-        priceInput.value = '';
-    }
-
-    await loadInventory();
-}
-
-function setCategory(cat, btn) {
-    currentCategory = cat;
-
-    document.querySelectorAll('.chip').forEach(c => {
-        c.classList.remove('active');
-    });
-
-    btn.classList.add('active');
-
-    render();
-}
-
-function openLowStockModal() {
-    const lowItems = inventory.filter(
-        i => i.quantity <= i.minStock
-    );
-
-    const body = document.getElementById('lowStockModalBody');
-
-    if (lowItems.length === 0) {
-        body.innerHTML =
-            '<div style="text-align:center; color:#34d399; padding:20px;">אין פריטים בחריגה! הכל תקין.</div>';
-    } else {
-        body.innerHTML = lowItems.map(item => `
-            <div class="modal-item">
-                <div>
-                    <strong style="color:#fff; font-size:1rem; display:block;">
-                        ${item.name}
-                    </strong>
-
-                    <span style="font-size:0.75rem; color:#94a3b8;">
-                        קטגוריה: ${item.category} |
-                        מינימום מוגדר: ${item.minStock}
-                    </span>
-                </div>
-
-                <div style="display:flex; align-items:center; gap:12px;">
-                    <span style="color:#f87171; font-weight:bold;">
-                        כמות: ${item.quantity}
-                    </span>
-
-                    <button
-                        class="edit-btn"
-                        onclick="scrollToItem(${item.id})"
-                    >
-                        הצג בכרטיסיות
-                    </button>
-                </div>
-            </div>
-        `).join('');
-    }
-
-    document
-        .getElementById('lowStockModal')
-        .classList.add('active');
-}
-
-function closeLowStockModal() {
-    document
-        .getElementById('lowStockModal')
-        .classList.remove('active');
-}
-
-function scrollToItem(id) {
-    closeLowStockModal();
-
-    currentCategory = 'הכל';
-
-    document.querySelectorAll('.chip').forEach(c => {
-        c.classList.remove('active');
-    });
-
-    document.querySelector('.chip').classList.add('active');
-
-    document.getElementById('searchBox').value = '';
-
-    render();
-
-    setTimeout(() => {
-        const el = document.getElementById('card_' + id);
-
-        if (el) {
-            el.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center'
-            });
-
-            el.style.borderColor = '#ef4444';
-
-            setTimeout(() => {
-                el.style.borderColor =
-                    'rgba(51, 65, 85, 0.8)';
-            }, 2000);
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin: 0 0 4px 0;
+            color: #ffffff;
         }
-    }, 100);
-}
 
-function render() {
-    const search =
-        document
-            .getElementById('searchBox')
-            .value
-            .toLowerCase();
+        p {
+            color: #c7d2fe;
+            font-size: 0.85rem;
+            margin: 0;
+        }
 
-    const grid =
-        document.getElementById('itemsGrid');
+        #dbStatus {
+            margin-top: 5px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
 
-    const filtered = inventory.filter(i => {
-        const matchesSearch =
-            i.name
-                .toLowerCase()
-                .includes(search);
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
 
-        const matchesCat =
-            currentCategory
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: rgba(30, 41, 59, 0.7);
+            border-radius: 14px;
+            padding: 18px;
+            border: 1px solid rgba(51, 65, 85, 0.6);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .stat-card.clickable {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .stat-card.clickable:hover {
+            border-color: #6366f1;
+            transform: translateY(-2px);
+            background: rgba(30, 41, 59, 0.9);
+        }
+
+        .stat-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            background: rgba(99, 102, 241, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #f8fafc;
+        }
+
+        .card {
+            background: rgba(30, 41, 59, 0.9);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+            margin-bottom: 25px;
+            border: 2px solid rgba(99, 102, 241, 0.4);
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin: 0 0 16px 0;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) 120px;
+            gap: 14px;
+            align-items: end;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        label {
+            font-size: 0.8rem;
+            color: #cbd5e1;
+            font-weight: 700;
+        }
+
+        input, select {
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(99, 102, 241, 0.5);
+            font-size: 0.95rem;
+            background: rgba(15, 23, 42, 0.9);
+            color: #fff;
+            width: 100%;
+        }
+
+        input:focus, select:focus {
+            border-color: #818cf8;
+            outline: none;
+            box-shadow: 0 0 8px rgba(129, 140, 248, 0.4);
+        }
+
+        button {
+            font-family: inherit;
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+
+        .primary-btn:disabled {
+            opacity: 0.55;
+            cursor: wait;
+        }
+
+        .export-btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 2;
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid rgba(51, 65, 85, 0.8);
+            background: rgba(30, 41, 59, 0.8);
+            color: #fff;
+        }
+
+        .chips {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            flex: 3;
+        }
+
+        .chip {
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            white-space: nowrap;
+            font-weight: 600;
+            background: rgba(30, 41, 59, 0.8);
+            color: #94a3b8;
+            border: 1px solid rgba(51, 65, 85, 0.8);
+        }
+
+        .chip.active {
+            background: #6366f1;
+            color: #fff;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 16px;
+        }
+
+        .item-card {
+            background: rgba(30, 41, 59, 0.85);
+            border-radius: 14px;
+            padding: 16px;
+            border: 1px solid rgba(51, 65, 85, 0.8);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1px solid rgba(51, 65, 85, 0.6);
+            padding-bottom: 10px;
+        }
+
+        .badge {
+            background: rgba(49, 46, 129, 0.6);
+            color: #c7d2fe;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+
+        .ok-badge {
+            background: rgba(6, 78, 59, 0.6);
+            color: #34d399;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .alert-badge {
+            background: rgba(127, 29, 29, 0.6);
+            color: #fca5a5;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: #94a3b8;
+            gap: 10px;
+        }
+
+        .item-row span:last-child {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .table-input {
+            width: 65px;
+            padding: 4px;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+
+        .action-row {
+            background: rgba(15, 23, 42, 0.5);
+            padding: 8px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .minus-btn {
+            background: #ef4444;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .plus-btn {
+            background: #10b981;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .delete-btn {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 0.7rem;
+            cursor: pointer;
+        }
+
+        .edit-btn {
+            background: rgba(99, 102, 241, 0.2);
+            color: #818cf8;
+            border: 1px solid rgba(99, 102, 241, 0.4);
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 0.7rem;
+            cursor: 
