@@ -1,456 +1,409 @@
-<!DOCTYPE html>
-<html lang="he" dir="rtl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>מערכת ניהול מלאי חכמה</title>
+const SUPABASE_URL = 'https://wsxwrzmrzrwcnwowsgve.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_5Wh7wSRJIXOg4nqLhLyTmg_2Ny1OJ7l';
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  <style>
-    * { box-sizing: border-box; }
+let inventory = [];
+let currentCategory = 'הכל';
+let editingId = null;
 
-    body {
-      margin: 0;
-      padding: 0 0 50px;
-      background: radial-gradient(circle at top, #1e1b4b 0%, #0f172a 60%);
-      color: #f8fafc;
-      font-family: "Segoe UI", Tahoma, Arial, sans-serif;
-      min-height: 100vh;
+function fromDB(row) {
+    return {
+        id: Number(row.id),
+        name: row.name || '',
+        category: row.category || 'אחר',
+        quantity: Number(row.quantity || 0),
+        minStock: Number(row.min_stock || 0),
+        lastPrice: Number(row.last_price || 0),
+        prevPrice: Number(row.prev_price || 0),
+        totalConsumed: Number(row.total_consumed || 0),
+        lastDate: row.last_date || 'טרם עודכן'
+    };
+}
+
+async function loadInventory() {
+    const status = document.getElementById('dbStatus');
+
+    if (status) {
+        status.textContent = '🟡 מתחבר ל-Supabase...';
     }
 
-    header {
-      background: linear-gradient(135deg, rgba(30,27,75,.96), rgba(49,46,129,.96));
-      padding: 20px 35px;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+    const { data, error } = await db
+        .from('inventory')
+        .select('*')
+        .order('id', { ascending: false });
+
+    if (error) {
+        console.error('Supabase load error:', error);
+
+        if (status) {
+            status.textContent = '🔴 שגיאה בחיבור ל-Supabase';
+            status.style.color = '#f87171';
+        }
+
+        return;
     }
 
-    .header-content {
-      max-width: 1200px;
-      margin: auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 15px;
-      flex-wrap: wrap;
+    inventory = (data || []).map(fromDB);
+
+    if (status) {
+        status.textContent = '🟢 מחובר ל-Supabase';
+        status.style.color = '#34d399';
     }
 
-    h1 {
-      margin: 0;
-      font-size: 1.5rem;
+    render();
+}
+
+async function addItem(e) {
+    e.preventDefault();
+
+    const newItem = {
+        name: document.getElementById('newName').value.trim(),
+        category: document.getElementById('newCategory').value,
+        quantity: parseInt(document.getElementById('newQuantity').value) || 0,
+        min_stock: parseInt(document.getElementById('newMin').value) || 5,
+        last_price: parseFloat(document.getElementById('newPrice').value) || 0,
+        prev_price: 0,
+        total_consumed: 0,
+        last_date: 'טרם עודכן'
+    };
+
+    if (!newItem.name) {
+        alert('שם הפריט לא יכול להיות ריק');
+        return;
     }
 
-    .subtitle {
-      color: #c7d2fe;
-      font-size: .85rem;
-      margin-top: 4px;
+    const { error } = await db
+        .from('inventory')
+        .insert(newItem);
+
+    if (error) {
+        console.error('Supabase insert error:', error);
+        alert('שגיאה בהוספת הפריט: ' + error.message);
+        return;
     }
 
-    #status {
-      font-size: .8rem;
-      color: #fbbf24;
-      margin-top: 7px;
-      font-weight: bold;
+    e.target.reset();
+
+    document.getElementById('newQuantity').value = '0';
+    document.getElementById('newMin').value = '5';
+    document.getElementById('newPrice').value = '';
+
+    document.getElementById('newName').focus();
+
+    await loadInventory();
+}
+
+async function deleteItem(id) {
+    if (!confirm('האם למחוק את הפריט לצמיתות?')) {
+        return;
     }
 
-    .container {
-      max-width: 1200px;
-      margin: 22px auto;
-      padding: 0 18px;
+    const { error } = await db
+        .from('inventory')
+        .delete()
+        .eq('id', id);
+
+    if (error) {
+        console.error('Supabase delete error:', error);
+        alert('שגיאה במחיקת הפריט: ' + error.message);
+        return;
     }
 
-    .card {
-      background: rgba(30,41,59,.9);
-      border: 1px solid rgba(99,102,241,.4);
-      border-radius: 16px;
-      padding: 22px;
-      margin-bottom: 22px;
-      box-shadow: 0 10px 25px rgba(0,0,0,.35);
+    if (editingId === id) {
+        editingId = null;
     }
 
-    .section-title {
-      font-size: 1.15rem;
-      font-weight: 700;
-      margin-bottom: 15px;
+    await loadInventory();
+}
+
+function toggleEdit(id) {
+    editingId = editingId === id ? null : id;
+    render();
+}
+
+async function saveEdit(id) {
+    const newName = document.getElementById('edit_name_' + id).value.trim();
+    const newCat = document.getElementById('edit_cat_' + id).value;
+    const newMin = parseInt(document.getElementById('edit_min_' + id).value) || 0;
+
+    if (!newName) {
+        alert('שם הפריט לא יכול להיות ריק');
+        return;
     }
 
-    .form {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(145px,1fr));
-      gap: 12px;
-      align-items: end;
+    const { error } = await db
+        .from('inventory')
+        .update({
+            name: newName,
+            category: newCat,
+            min_stock: newMin
+        })
+        .eq('id', id);
+
+    if (error) {
+        console.error('Supabase edit error:', error);
+        alert('שגיאה בעריכת הפריט: ' + error.message);
+        return;
     }
 
-    .group {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
+    editingId = null;
+
+    await loadInventory();
+}
+
+async function updateField(id, field, val) {
+    const item = inventory.find(i => i.id === id);
+
+    if (!item) return;
+
+    const numericVal = val === '' ? 0 : parseFloat(val) || 0;
+
+    if (field === 'lastPrice') {
+        const updateData = {
+            last_price: numericVal
+        };
+
+        if (numericVal !== item.lastPrice) {
+            updateData.prev_price = item.lastPrice;
+        }
+
+        const { error } = await db
+            .from('inventory')
+            .update(updateData)
+            .eq('id', id);
+
+        if (error) {
+            console.error('Supabase price update error:', error);
+            alert('שגיאה בעדכון המחיר: ' + error.message);
+            return;
+        }
+
+        await loadInventory();
+    }
+}
+
+async function addStock(id) {
+    const qtyInput = document.getElementById('qty_' + id);
+    const priceInput = document.getElementById('price_' + id);
+
+    const amount = parseInt(qtyInput.value) || 0;
+    const newPrice = parseFloat(priceInput.value);
+
+    if (amount <= 0) {
+        alert('אנא הזן כמות חיובית להוספה');
+        return;
     }
 
-    label {
-      color: #cbd5e1;
-      font-size: .8rem;
-      font-weight: 600;
+    const item = inventory.find(i => i.id === id);
+
+    if (!item) return;
+
+    const now = new Date();
+
+    const updateData = {
+        quantity: item.quantity + amount,
+        last_date:
+            'הוספה: ' +
+            now.toLocaleDateString('he-IL') +
+            ' ' +
+            now.toLocaleTimeString(
+                'he-IL',
+                { hour: '2-digit', minute: '2-digit' }
+            )
+    };
+
+    if (
+        !isNaN(newPrice) &&
+        newPrice >= 0 &&
+        newPrice !== item.lastPrice
+    ) {
+        updateData.prev_price = item.lastPrice;
+        updateData.last_price = newPrice;
     }
 
-    input, select {
-      width: 100%;
-      padding: 11px;
-      border: 1px solid #475569;
-      border-radius: 8px;
-      background: #0f172a;
-      color: white;
+    const { error } = await db
+        .from('inventory')
+        .update(updateData)
+        .eq('id', id);
+
+    if (error) {
+        console.error('Supabase add stock error:', error);
+        alert('שגיאה בהוספת הסחורה: ' + error.message);
+        return;
     }
 
-    input:focus, select:focus {
-      outline: none;
-      border-color: #818cf8;
+    qtyInput.value = '';
+    priceInput.value = '';
+
+    await loadInventory();
+}
+
+async function deductStock(id) {
+    const qtyInput = document.getElementById('qty_' + id);
+    const amount = parseInt(qtyInput.value) || 0;
+
+    if (amount <= 0) {
+        alert('אנא הזן כמות חיובית להורדה');
+        return;
     }
 
-    button {
-      cursor: pointer;
-      font-family: inherit;
+    const item = inventory.find(i => i.id === id);
+
+    if (!item) return;
+
+    if (item.quantity < amount) {
+        alert('אין מספיק יחידות במלאי לפעולה זו!');
+        return;
     }
 
-    .primary-btn {
-      padding: 11px;
-      border: 0;
-      border-radius: 8px;
-      background: #6366f1;
-      color: white;
-      font-weight: bold;
+    const now = new Date();
+
+    const { error } = await db
+        .from('inventory')
+        .update({
+            quantity: item.quantity - amount,
+            total_consumed: (item.totalConsumed || 0) + amount,
+            last_date:
+                'הורדה: ' +
+                now.toLocaleDateString('he-IL') +
+                ' ' +
+                now.toLocaleTimeString(
+                    'he-IL',
+                    { hour: '2-digit', minute: '2-digit' }
+                )
+        })
+        .eq('id', id);
+
+    if (error) {
+        console.error('Supabase deduct stock error:', error);
+        alert('שגיאה בהורדת הסחורה: ' + error.message);
+        return;
     }
 
-    .export-btn {
-      padding: 10px 15px;
-      border: 0;
-      border-radius: 8px;
-      background: #059669;
-      color: white;
-      font-weight: bold;
+    qtyInput.value = '';
+
+    const priceInput = document.getElementById('price_' + id);
+
+    if (priceInput) {
+        priceInput.value = '';
     }
 
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
-      gap: 14px;
-      margin-bottom: 20px;
+    await loadInventory();
+}
+
+function setCategory(cat, btn) {
+    currentCategory = cat;
+
+    document.querySelectorAll('.chip').forEach(c => {
+        c.classList.remove('active');
+    });
+
+    btn.classList.add('active');
+
+    render();
+}
+
+function openLowStockModal() {
+    const lowItems = inventory.filter(
+        i => i.quantity <= i.minStock
+    );
+
+    const body = document.getElementById('lowStockModalBody');
+
+    if (lowItems.length === 0) {
+        body.innerHTML =
+            '<div style="text-align:center; color:#34d399; padding:20px;">אין פריטים בחריגה! הכל תקין.</div>';
+    } else {
+        body.innerHTML = lowItems.map(item => `
+            <div class="modal-item">
+                <div>
+                    <strong style="color:#fff; font-size:1rem; display:block;">
+                        ${item.name}
+                    </strong>
+
+                    <span style="font-size:0.75rem; color:#94a3b8;">
+                        קטגוריה: ${item.category} |
+                        מינימום מוגדר: ${item.minStock}
+                    </span>
+                </div>
+
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <span style="color:#f87171; font-weight:bold;">
+                        כמות: ${item.quantity}
+                    </span>
+
+                    <button
+                        class="edit-btn"
+                        onclick="scrollToItem(${item.id})"
+                    >
+                        הצג בכרטיסיות
+                    </button>
+                </div>
+            </div>
+        `).join('');
     }
 
-    .stat-card {
-      background: rgba(30,41,59,.85);
-      border: 1px solid #334155;
-      border-radius: 14px;
-      padding: 17px;
-    }
+    document
+        .getElementById('lowStockModal')
+        .classList.add('active');
+}
 
-    .stat-card.clickable {
-      cursor: pointer;
-    }
+function closeLowStockModal() {
+    document
+        .getElementById('lowStockModal')
+        .classList.remove('active');
+}
 
-    .stat-card.clickable:hover {
-      border-color: #6366f1;
-    }
+function scrollToItem(id) {
+    closeLowStockModal();
 
-    .stat-label {
-      font-size: .8rem;
-      color: #94a3b8;
-    }
+    currentCategory = 'הכל';
 
-    .stat-value {
-      font-size: 1.6rem;
-      font-weight: 800;
-      margin-top: 5px;
-    }
+    document.querySelectorAll('.chip').forEach(c => {
+        c.classList.remove('active');
+    });
 
-    .filters {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 18px;
-    }
+    document.querySelector('.chip').classList.add('active');
 
-    .search-box {
-      flex: 1;
-      min-width: 220px;
-    }
+    document.getElementById('searchBox').value = '';
 
-    .chips {
-      display: flex;
-      gap: 5px;
-      flex-wrap: wrap;
-    }
+    render();
 
-    .chip {
-      padding: 8px 12px;
-      border-radius: 18px;
-      background: #1e293b;
-      color: #94a3b8;
-      border: 1px solid #334155;
-    }
+    setTimeout(() => {
+        const el = document.getElementById('card_' + id);
 
-    .chip.active {
-      background: #6366f1;
-      color: white;
-    }
+        if (el) {
+            el.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
 
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill,minmax(300px,1fr));
-      gap: 15px;
-    }
+            el.style.borderColor = '#ef4444';
 
-    .item-card {
-      background: rgba(30,41,59,.9);
-      border: 1px solid #334155;
-      border-radius: 14px;
-      padding: 15px;
-    }
+            setTimeout(() => {
+                el.style.borderColor =
+                    'rgba(51, 65, 85, 0.8)';
+            }, 2000);
+        }
+    }, 100);
+}
 
-    .item-header {
-      display: flex;
-      justify-content: space-between;
-      gap: 8px;
-      border-bottom: 1px solid #334155;
-      padding-bottom: 9px;
-      margin-bottom: 10px;
-    }
+function render() {
+    const search =
+        document
+            .getElementById('searchBox')
+            .value
+            .toLowerCase();
 
-    .item-name {
-      font-size: 1.08rem;
-      font-weight: bold;
-    }
+    const grid =
+        document.getElementById('itemsGrid');
 
-    .badge {
-      display: inline-block;
-      margin-top: 5px;
-      padding: 3px 7px;
-      border-radius: 5px;
-      background: #312e81;
-      color: #c7d2fe;
-      font-size: .72rem;
-    }
+    const filtered = inventory.filter(i => {
+        const matchesSearch =
+            i.name
+                .toLowerCase()
+                .includes(search);
 
-    .status-ok {
-      color: #34d399;
-      font-weight: bold;
-      font-size: .75rem;
-    }
-
-    .status-low {
-      color: #f87171;
-      font-weight: bold;
-      font-size: .75rem;
-    }
-
-    .row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-      margin: 9px 0;
-      color: #94a3b8;
-      font-size: .85rem;
-    }
-
-    .qty {
-      font-size: 1.2rem;
-      font-weight: bold;
-    }
-
-    .actions {
-      background: #0f172a;
-      padding: 9px;
-      border-radius: 8px;
-      margin: 10px 0;
-    }
-
-    .action-inputs,
-    .action-buttons {
-      display: flex;
-      gap: 6px;
-      margin-top: 6px;
-    }
-
-    .plus-btn,
-    .minus-btn,
-    .edit-btn,
-    .delete-btn,
-    .save-btn,
-    .cancel-btn {
-      padding: 7px 9px;
-      border-radius: 6px;
-      font-weight: 600;
-    }
-
-    .plus-btn,
-    .save-btn {
-      background: #10b981;
-      color: white;
-      border: 0;
-      flex: 1;
-    }
-
-    .minus-btn {
-      background: #ef4444;
-      color: white;
-      border: 0;
-      flex: 1;
-    }
-
-    .edit-btn {
-      background: #3730a3;
-      color: #c7d2fe;
-      border: 1px solid #6366f1;
-    }
-
-    .delete-btn,
-    .cancel-btn {
-      background: #7f1d1d;
-      color: #fecaca;
-      border: 1px solid rgba(239,68,68,.4);
-    }
-
-    .history {
-      background: #0f172a;
-      padding: 8px;
-      border-radius: 7px;
-      font-size: .76rem;
-      color: #cbd5e1;
-      margin-top: 7px;
-    }
-
-    .edit-box {
-      background: #0f172a;
-      padding: 11px;
-      border-radius: 9px;
-      border: 1px solid #6366f1;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .empty {
-      text-align: center;
-      grid-column: 1/-1;
-      padding: 35px;
-      color: #94a3b8;
-    }
-
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(15,23,42,.9);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-      padding: 15px;
-    }
-
-    .modal-overlay.show {
-      display: flex;
-    }
-
-    .modal-box {
-      width: 90%;
-      max-width: 550px;
-      max-height: 80vh;
-      overflow-y: auto;
-      background: #1e293b;
-      border: 1px solid #6366f1;
-      border-radius: 14px;
-      padding: 18px;
-    }
-
-    .modal-item {
-      background: #0f172a;
-      border: 1px solid rgba(239,68,68,.4);
-      border-radius: 8px;
-      padding: 11px;
-      margin-top: 8px;
-      display: flex;
-      justify-content: space-between;
-      gap: 8px;
-    }
-
-    .toast {
-      position: fixed;
-      left: 20px;
-      bottom: 20px;
-      background: #059669;
-      color: white;
-      padding: 11px 16px;
-      border-radius: 9px;
-      z-index: 2000;
-      font-weight: bold;
-    }
-
-    .toast.error {
-      background: #dc2626;
-    }
-
-    @media(max-width:650px) {
-      header { padding: 15px; }
-      .container { padding: 0 10px; }
-
-      .action-inputs,
-      .action-buttons {
-        flex-direction: column;
-      }
-    }
-  </style>
-</head>
-
-<body>
-
-<header>
-  <div class="header-content">
-    <div>
-      <h1>📦 ניהול מלאי חכם</h1>
-      <div class="subtitle">מערכת מלאי משותפת בענן</div>
-      <div id="status">🟡 מתחבר ל-Supabase...</div>
-    </div>
-
-    <button class="export-btn" type="button" onclick="exportCSV()">
-      📥 ייצוא לאקסל
-    </button>
-  </div>
-</header>
-
-<div class="container">
-
-  <div class="card">
-    <div class="section-title">➕ הוספת פריט חדש למלאי</div>
-
-    <form id="addForm" class="form">
-
-      <div class="group">
-        <label for="newName">שם הפריט</label>
-        <input id="newName" required placeholder="לדוגמה: דפי A4">
-      </div>
-
-      <div class="group">
-        <label for="newCategory">קטגוריה</label>
-        <select id="newCategory">
-          <option value="ציוד משרדי">ציוד משרדי</option>
-          <option value="נייר ודפוס">נייר ודפוס</option>
-          <option value="אחזקה וניקיון">אחזקה וניקיון</option>
-          <option value="אחר">אחר</option>
-        </select>
-      </div>
-
-      <div class="group">
-        <label for="newQuantity">כמות התחלתית</label>
-        <input id="newQuantity" type="number" min="0" value="0" required>
-      </div>
-
-      <div class="group">
-        <label for="newMin">מינימום התראה</label>
-        <input id="newMin" type="number" min="0" value="5">
-      </div>
-
- 
+        const matchesCat =
+            currentCategory
