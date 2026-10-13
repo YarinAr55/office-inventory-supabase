@@ -10,72 +10,63 @@
 </style></head>
 <body>
 
-<!-- מסך התחברות מאובטח -->
+<!-- מסך נעילה בסיסמה בלבד -->
 <div id="loginOverlay" style="position:fixed; inset:0; background:#0f172af0; display:flex; align-items:center; justify-content:center; z-index:9999;">
-  <div class="card" style="max-width:360px; width:90%; margin:0;">
-    <div class="section-title" style="text-align:center;">🔐 כניסה למערכת</div>
-    <form onsubmit="handleLogin(event)" style="display:flex; flex-direction:column; gap:12px;">
-      <div class="input-group">
-        <label>אימייל</label>
-        <input type="email" id="loginEmail" required placeholder="user@example.com">
-      </div>
-      <div class="input-group">
-        <label>סיסמה</label>
-        <input type="password" id="loginPassword" required placeholder="******" autocomplete="current-password">
-      </div>
-      <button type="submit" class="primary-btn" id="loginBtn">התחבר</button>
-      <p id="passError" style="color:#f87171; margin:0; display:none; font-size:0.85rem; text-align:center;"></p>
+  <div class="card" style="max-width:360px; width:90%; text-align:center; margin:0;">
+    <div class="section-title">🔐 כניסה למערכת</div>
+    <form onsubmit="checkPassword(event)" style="display:flex; flex-direction:column; gap:12px;">
+      <input type="password" id="passInput" placeholder="הכנס סיסמה..." style="text-align:center;" required autocomplete="current-password">
+      <button type="submit" class="primary-btn">התחבר</button>
+      <p id="passError" style="color:#f87171; margin:0; display:none; font-size:0.85rem;">סיסמה שגויה!</p>
     </form>
   </div>
 </div>
 
-<div id="appContent" style="display:none;">
-  <header>
-    <div class="header-content">
-      <div>
-        <h1>📦 ניהול מלאי חכם</h1>
-        <p>מערכת מלאי משותפת בענן</p>
-        <p id="dbStatus">🟡 מתחבר ל-Supabase...</p>
-      </div>
-      <div style="display:flex; gap:10px; align-items:center;">
-        <button type="button" class="export-btn" onclick="exportToExcel()">📥 ייצוא לאקסל</button>
-        <button type="button" class="delete-btn" onclick="handleLogout()">🔒 התנתק</button>
-      </div>
+<header>
+  <div class="header-content">
+    <div>
+      <h1>📦 ניהול מלאי חכם</h1>
+      <p>מערכת מלאי משותפת בענן</p>
+      <p id="dbStatus">🟡 מתחבר ל-Supabase...</p>
     </div>
-  </header>
-
-  <div class="container">
-    <div class="card">
-      <div class="section-title">➕ הוספת פריט חדש למלאי</div>
-      <form id="addForm" class="form">
-        <div class="input-group"><label>שם הפריט</label><input id="newName" required placeholder="למשל: דפים A4"></div>
-        <div class="input-group"><label>קטגוריה</label><select id="newCategory"><option>ציוד משרדי</option><option>נייר ודפוס</option><option>אחזקה וניקיון</option><option>אחר</option></select></div>
-        <div class="input-group"><label>כמות התחלתית</label><input type="number" id="newQuantity" value="0" min="0" required></div>
-        <div class="input-group"><label>מינימום התראה</label><input type="number" id="newMin" value="5" min="0"></div>
-        <div class="input-group"><label>מחיר יחידה (₪)</label><input type="number" id="newPrice" value="0" step="any" min="0"></div>
-        <div><button id="addBtn" class="primary-btn" type="submit">הוסף פריט</button></div>
-      </form>
+    <div style="display:flex; gap:10px; align-items:center;">
+      <button type="button" class="export-btn" onclick="exportToExcel()">📥 ייצוא לאקסל</button>
+      <button type="button" class="delete-btn" onclick="lockApp()">🔒 נעילה</button>
     </div>
-
-    <div class="stats-grid">
-      <div class="stat-card"><div class="stat-icon">📦</div><div><span class="stat-label">סה"כ יחידות במלאי</span><div class="stat-value" id="totalCount">0</div></div></div>
-      <div class="stat-card clickable" onclick="openLowStockModal()"><div class="stat-icon">⚠️</div><div><span class="stat-label">פריטים במלאי נמוך (לחץ לצפייה)</span><div class="stat-value" id="lowCount">0</div></div></div>
-      <div class="stat-card"><div class="stat-icon">💰</div><div><span class="stat-label">שווי כולל של המלאי</span><div class="stat-value" id="totalValue">₪0</div></div></div>
-    </div>
-
-    <div class="filter-bar">
-      <input class="search-box" id="searchBox" placeholder="🔍 חיפוש פריט מהיר...">
-      <div class="chips">
-        <button type="button" class="chip active" onclick="setCategory('הכל',this)">הכל</button>
-        <button type="button" class="chip" onclick="setCategory('ציוד משרדי',this)">ציוד משרדי</button>
-        <button type="button" class="chip" onclick="setCategory('נייר ודפוס',this)">נייר ודפוס</button>
-        <button type="button" class="chip" onclick="setCategory('אחזקה וניקיון',this)">אחזקה וניקיון</option>
-        <button type="button" class="chip" onclick="setCategory('אחר',this)">אחר</button>
-      </div>
-    </div>
-
-    <div class="grid-container" id="itemsGrid"><div class="empty">טוען מלאי...</div></div>
   </div>
+</header>
+
+<div class="container">
+  <div class="card">
+    <div class="section-title">➕ הוספת פריט חדש למלאי</div>
+    <form id="addForm" class="form">
+      <div class="input-group"><label>שם הפריט</label><input id="newName" required placeholder="למשל: דפים A4"></div>
+      <div class="input-group"><label>קטגוריה</label><select id="newCategory"><option>ציוד משרדי</option><option>נייר ודפוס</option><option>אחזקה וניקיון</option><option>אחר</option></select></div>
+      <div class="input-group"><label>כמות התחלתית</label><input type="number" id="newQuantity" value="0" min="0" required></div>
+      <div class="input-group"><label>מינימום התראה</label><input type="number" id="newMin" value="5" min="0"></div>
+      <div class="input-group"><label>מחיר יחידה (₪)</label><input type="number" id="newPrice" value="0" step="any" min="0"></div>
+      <div><button id="addBtn" class="primary-btn" type="submit">הוסף פריט</button></div>
+    </form>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-icon">📦</div><div><span class="stat-label">סה"כ יחידות במלאי</span><div class="stat-value" id="totalCount">0</div></div></div>
+    <div class="stat-card clickable" onclick="openLowStockModal()"><div class="stat-icon">⚠️</div><div><span class="stat-label">פריטים במלאי נמוך (לחץ לצפייה)</span><div class="stat-value" id="lowCount">0</div></div></div>
+    <div class="stat-card"><div class="stat-icon">💰</div><div><span class="stat-label">שווי כולל של המלאי</span><div class="stat-value" id="totalValue">₪0</div></div></div>
+  </div>
+
+  <div class="filter-bar">
+    <input class="search-box" id="searchBox" placeholder="🔍 חיפוש פריט מהיר...">
+    <div class="chips">
+      <button type="button" class="chip active" onclick="setCategory('הכל',this)">הכל</button>
+      <button type="button" class="chip" onclick="setCategory('ציוד משרדי',this)">ציוד משרדי</button>
+      <button type="button" class="chip" onclick="setCategory('נייר ודפוס',this)">נייר ודפוס</button>
+      <button type="button" class="chip" onclick="setCategory('אחזקה וניקיון',this)">אחזקה וניקיון</button>
+      <button type="button" class="chip" onclick="setCategory('אחר',this)">אחר</button>
+    </div>
+  </div>
+
+  <div class="grid-container" id="itemsGrid"><div class="empty">טוען מלאי...</div></div>
 </div>
 
 <div class="modal-overlay" id="lowStockModal"><div class="modal-content"><div style="display:flex;justify-content:space-between"><strong style="color:#f87171">⚠️ פריטים מתחת למינימום</strong><button class="delete-btn" onclick="closeLowStockModal()">✕</button></div><div id="lowStockModalBody"></div></div></div>
@@ -86,34 +77,27 @@ const SUPABASE_KEY='sb_publishable_5Wh7wSRJIXOg4nqLhLyTmg_2Ny1OJ7l';
 let db, inventory = [], currentCategory = 'הכל', editingId = null; 
 const $ = id => document.getElementById(id);
 
-// --- התחברות בטוחה ישירות מול Supabase ---
-async function handleLogin(e) {
-  e.preventDefault();
-  const email = $('loginEmail').value;
-  const password = $('loginPassword').value;
-  const err = $('passError');
-  err.style.display = 'none';
-
-  $('loginBtn').textContent = 'מתחבר...';
-  let { data, error } = await db.auth.signInWithPassword({ email, password });
-  $('loginBtn').textContent = 'התחבר';
-
-  if (error) {
-    err.textContent = 'פרטי התחברות שגויים';
-    err.style.display = 'block';
+function checkPassword(e) {
+  if (e) e.preventDefault();
+  const input = $('passInput').value.trim();
+  if (input === '1234567') {
+    localStorage.setItem('auth_pass_token', 'active_session_granted');
+    $('loginOverlay').style.display = 'none';$('passError').style.display = 'none';
   } else {
-    showApp();
+    $('passError').style.display = 'block';
   }
 }
 
-async function handleLogout() {
-  await db.auth.signOut();
-  $('appContent').style.display = 'none';$('loginOverlay').style.display = 'flex';
+function lockApp() {
+  localStorage.removeItem('auth_pass_token');
+  $('passInput').value = '';$('loginOverlay').style.display = 'flex';
 }
 
-function showApp() {
-  $('loginOverlay').style.display = 'none';$('appContent').style.display = 'block';
-  loadInventory();
+if (localStorage.getItem('auth_pass_token') === 'active_session_granted') {
+  document.addEventListener('DOMContentLoaded', () => {
+    const overlay = $('loginOverlay');
+    if (overlay) overlay.style.display = 'none';
+  });
 }
 
 function esc(v){return String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;')}
@@ -318,14 +302,7 @@ async function initApp(){
   try {
     if(!window.supabase) throw new Error('ספריית Supabase לא נטענה');
     db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    
-    // בדיקה האם המשתמש כבר מחובר
-    const { data: { session } } = await db.auth.getSession();
-    if (session) {
-      showApp();
-    } else {
-      $('loginOverlay').style.display = 'flex';$('appContent').style.display = 'none';
-    }
+    await loadInventory();
   } catch(e) {
     console.error(e);
     $('dbStatus').textContent='🔴 '+e.message;
