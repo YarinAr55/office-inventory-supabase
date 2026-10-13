@@ -10,13 +10,13 @@
 </style></head>
 <body>
 
-<!-- מסך נעילה בסיסמה פשוטה -->
+<!-- מסך נעילה בסיסמה -->
 <div id="loginOverlay" style="position:fixed; inset:0; background:#0f172af0; display:flex; align-items:center; justify-content:center; z-index:9999;">
   <div class="card" style="max-width:360px; width:90%; text-align:center; margin:0;">
     <div class="section-title">🔐 כניסה למערכת</div>
     <form onsubmit="checkPassword(event)" style="display:flex; flex-direction:column; gap:12px;">
       <input type="password" id="passInput" placeholder="הכנס סיסמה..." style="text-align:center;" required autocomplete="current-password">
-      <button type="submit" class="primary-btn">התחבר</button>
+      <button type="submit" class="primary-btn" id="loginBtn">התחבר</button>
       <p id="passError" style="color:#f87171; margin:0; display:none; font-size:0.85rem;">סיסמה שגויה!</p>
     </form>
   </div>
@@ -53,58 +53,3 @@
   <div class="stats-grid">
     <div class="stat-card"><div class="stat-icon">🏷️</div><div><span class="stat-label">סה"כ סוגי פריטים</span><div class="stat-value" id="totalTypesCount">0</div></div></div>
     <div class="stat-card"><div class="stat-icon">📦</div><div><span class="stat-label">סה"כ יחידות במלאי</span><div class="stat-value" id="totalCount">0</div></div></div>
-    <div class="stat-card clickable" onclick="openLowStockModal()"><div class="stat-icon">⚠️</div><div><span class="stat-label">פריטים במלאי נמוך</span><div class="stat-value" id="lowCount">0</div></div></div>
-    <div class="stat-card"><div class="stat-icon">💰</div><div><span class="stat-label">שווי כולל של המלאי</span><div class="stat-value" id="totalValue">₪0</div></div></div>
-  </div>
-
-  <div class="filter-bar">
-    <input class="search-box" id="searchBox" placeholder="🔍 חיפוש פריט מהיר...">
-    <div class="chips">
-      <button type="button" class="chip active" onclick="setCategory('הכל',this)">הכל</button>
-      <button type="button" class="chip" onclick="setCategory('ציוד משרדי',this)">ציוד משרדי</button>
-      <button type="button" class="chip" onclick="setCategory('נייר ודפוס',this)">נייר ודפוס</button>
-      <button type="button" class="chip" onclick="setCategory('אחזקה וניקיון',this)">אחזקה וניקיון</option>
-      <button type="button" class="chip" onclick="setCategory('אחר',this)">אחר</button>
-    </div>
-  </div>
-
-  <div class="grid-container" id="itemsGrid"><div class="empty">טוען מלאי...</div></div>
-</div>
-
-<div class="modal-overlay" id="lowStockModal"><div class="modal-content"><div style="display:flex;justify-content:space-between"><strong style="color:#f87171">⚠️ פריטים מתחת למינימום</strong><button class="delete-btn" onclick="closeLowStockModal()">✕</button></div><div id="lowStockModalBody"></div></div></div>
-
-<script>
-// --- הגדרת סיסמה קבועה ---
-const SECRET_PASSWORD = '1234567'; 
-
-function checkPassword(e) {
-  if (e) e.preventDefault();
-  const input = $('passInput').value;
-  if (input === SECRET_PASSWORD) {
-    localStorage.setItem('auth_pass', SECRET_PASSWORD);
-    $('loginOverlay').style.display = 'none';$('passError').style.display = 'none';
-  } else {
-    $('passError').style.display = 'block';
-  }
-}
-
-function lockApp() {
-  localStorage.removeItem('auth_pass');
-  $('passInput').value = '';$('loginOverlay').style.display = 'flex';
-}
-
-// בדיקת התחברות קודמת בדפדפן
-if (localStorage.getItem('auth_pass') === SECRET_PASSWORD) {
-  document.addEventListener('DOMContentLoaded', () => {
-    const overlay = $('loginOverlay');
-    if (overlay) overlay.style.display = 'none';
-  });
-}
-
-// --- ניהול המלאי מול Supabase ---
-const SUPABASE_URL='https://wsxwrzmrzrwcnwowsgve.supabase.co';
-const SUPABASE_KEY='sb_publishable_5Wh7wSRJIXOg4nqLhLyTmg_2Ny1OJ7l';
-let db, inventory = [], currentCategory = 'הכל', editingId = null; 
-const $ = id => document.getElementById(id);
-
-function esc(v){return String(v??'').replaceAll('&
