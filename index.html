@@ -163,9 +163,14 @@ async function addItem(e){
     delete newItem.warehouse;
     let retry = await db.from('inventory').insert([newItem]).select();
     if(retry.error) {
-      alert('שגיאה בהוספה ל-Supabase:\n' + retry.error.message);
-      console.error(retry.error);
-      return;
+      delete newItem.warehouse_location;
+      newItem.warehouse = whVal;
+      let retry2 = await db.from('inventory').insert([newItem]).select();
+      if(retry2.error) {
+        alert('שגיאה בהוספה ל-Supabase:\n' + retry2.error.message);
+        console.error(retry2.error);
+        return;
+      }
     }
   }
 
@@ -178,7 +183,7 @@ async function addItem(e){
 async function deleteItem(id){
   if(!confirm('האם למחוק את הפריט לצמיתות?')) return;
   let {error} = await db.from('inventory').delete().eq('id', id);
-  if(error) return alert(error.message);
+  if(error) return alert('שגיאה במחיקה: ' + error.message);
   await loadInventory();
 }
 
@@ -205,7 +210,12 @@ async function saveEdit(id){
   if(error) {
     delete updateData.warehouse;
     let retry = await db.from('inventory').update(updateData).eq('id', id);
-    if(retry.error) return alert(retry.error.message);
+    if(retry.error) {
+      delete updateData.warehouse_location;
+      updateData.warehouse = whVal;
+      let retry2 = await db.from('inventory').update(updateData).eq('id', id);
+      if(retry2.error) return alert('שגיאה בשמירה: ' + retry2.error.message);
+    }
   }
 
   editingId = null;
@@ -221,7 +231,7 @@ async function updatePrice(id, v){
     prev_price: i.lastPrice,
     last_price: p
   }).eq('id', id);
-  if(error) return alert(error.message);
+  if(error) return alert('שגיאה בעדכון מחיר: ' + error.message);
   await loadInventory();
 }
 
@@ -237,7 +247,7 @@ async function addStock(id){
     }
   }
   let {error} = await db.from('inventory').update(u).eq('id', id);
-  if(error) return alert(error.message);
+  if(error) return alert('שגיאה בהוספת מלאי: ' + error.message);
   await loadInventory();
 }
 
@@ -250,7 +260,7 @@ async function deductStock(id){
     total_consumed: i.totalConsumed + q,
     last_date: now('הורדה')
   }).eq('id', id);
-  if(error) return alert(error.message);
+  if(error) return alert('שגיאה בהורדת מלאי: ' + error.message);
   await loadInventory();
 }
 
