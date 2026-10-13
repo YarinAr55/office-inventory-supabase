@@ -57,4 +57,260 @@
   </div>
 
   <div class="filter-bar">
-    <input class="search-box" id="searchBox" placeholder="🔍 חיפוש פריט
+    <input class="search-box" id="searchBox" placeholder="🔍 חיפוש פריט מהיר...">
+    <div class="chips">
+      <button type="button" class="chip active" onclick="setCategory('הכל',this)">הכל</button>
+      <button type="button" class="chip" onclick="setCategory('ציוד משרדי',this)">ציוד משרדי</button>
+      <button type="button" class="chip" onclick="setCategory('נייר ודפוס',this)">נייר ודפוס</button>
+      <button type="button" class="chip" onclick="setCategory('אחזקה וניקיון',this)">אחזקה וניקיון</option>
+      <button type="button" class="chip" onclick="setCategory('אחר',this)">אחר</option>
+    </div>
+  </div>
+
+  <div class="grid-container" id="itemsGrid"><div class="empty">טוען מלאי...</div></div>
+</div>
+
+<div class="modal-overlay" id="lowStockModal"><div class="modal-content"><div style="display:flex;justify-content:space-between"><strong style="color:#f87171">⚠️ פריטים מתחת למינימום</strong><button class="delete-btn" onclick="closeLowStockModal()">✕</button></div><div id="lowStockModalBody"></div></div></div>
+
+<script>
+const SUPABASE_URL='https://wsxwrzmrzrwcnwowsgve.supabase.co';
+const SUPABASE_KEY='sb_publishable_5Wh7wSRJIXOg4nqLhLyTmg_2Ny1OJ7l';
+let db, inventory = [], currentCategory = 'הכל', editingId = null; 
+const $ = id => document.getElementById(id);
+
+// בדיקת סיסמה מיידית תוך כדי הקלדה
+function handlePassInput() {
+  const val = ($('passInput').value || '').trim();
+  if (val === '1234567') {
+    $('loginOverlay').style.display = 'none';$('passError').style.display = 'none';
+  } else if (val.length >= 7) {
+    $('passError').style.display = 'block';
+  } else {
+    $('passError').style.display = 'none';
+  }
+}
+
+function lockApp() {
+  if ($('passInput'))$('passInput').value = '';
+  if ($('loginOverlay'))$('loginOverlay').style.display = 'flex';
+}
+
+function esc(v){return String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;')}
+
+function mapRow(r){
+  return {
+    id: Number(r.id),
+    name: r.name || '',
+    category: r.category || 'אחר',
+    quantity: Number(r.quantity || 0),
+    minStock: Number(r.min_stock ?? r.minStock ?? 0),
+    lastPrice: Number(r.last_price ?? r.lastPrice ?? 0),
+    prevPrice: Number(r.prev_price ?? r.prevPrice ?? 0),
+    totalConsumed: Number(r.total_consumed ?? r.totalConsumed ?? 0),
+    lastDate: r.last_date ?? r.lastDate ?? 'טרם עודכן'
+  };
+}
+function now(a){return a+': '+new Date().toLocaleString('he-IL')}
+
+async function loadInventory(){
+  try {
+    $('dbStatus').textContent='🟡 טוען נתונים מ-Supabase...';
+    let {data, error} = await db.from('inventory').select('*').order('id', {ascending: false});
+    if(error) throw error;
+    inventory = (data || []).map(mapRow);
+    $('dbStatus').textContent='🟢 מחובר ל-Supabase';
+    $('dbStatus').style.color='#34d399';
+    render();
+  } catch(e) {
+    console.error(e);
+    $('dbStatus').textContent='🔴 שגיאה: '+e.message;
+    $('dbStatus').style.color='#f87171';
+    $('itemsGrid').innerHTML='<div class="empty">'+esc(e.message)+'</div>';
+  }
+}
+
+async function addItem(e){
+  e.preventDefault();
+  const name = $('newName').value.trim();
+  if(!name) return;
+
+  const itemObj = {
+    name: name,
+    category: $('newCategory').value,
+    quantity: Number($('newQuantity').value) || 0,
+    min_stock: Number($('newMin').value) || 0,
+    last_price: Number($('newPrice').value) || 0
+  };
+
+  let { data, error } = await db.from('inventory').insert([itemObj]);
+
+  if(error) {
+    alert('שגיאה בהוספה ל-Supabase:\n' + error.message);
+    console.error('Supabase Insert Error:', error);
+    return;
+  }
+
+  $('newName').value = '';$('newQuantity').value = '0';
+  $('newMin').value = '5';$('newPrice').value = '0';
+  await loadInventory();
+}
+
+async function deleteItem(id){
+  if(!confirm('האם למחוק את הפריט לצמיתות?')) return;
+  let {error} = await db.from('inventory').delete().eq('id', id);
+  if(error) return alert('שגיאה במחיקה: ' + error.message);
+  await loadInventory();
+}
+
+function toggleEdit(id){
+  editingId = editingId === id ? null : id;
+  render();
+}
+
+async function saveEdit(id){
+  let name = $('edit_name_'+id).value.trim();
+  if(!name) return alert('שם הפריט לא יכול להיות ריק');
+  
+  let u = {
+    name: name,
+    category: $('edit_cat_'+id).value,
+    min_stock: Number($('edit_min_'+id).value) || 0
+  };
+
+  let {error} = await db.from('inventory').update(u).eq('id', id);
+  if(error) return alert('שגיאה בשמירה: ' + error.message);
+
+  editingId = null;
+  await loadInventory();
+}
+
+async function updatePrice(id, v){
+  let i = inventory.find(x => x.id === id);
+  if(!i) return;
+  let p = Number(v) || 0;
+  if(p === i.lastPrice) return;
+  let {error} = await db.from('inventory').update({
+    prev_price: i.lastPrice,
+    last_price: p
+  }).eq('id', id);
+  if(error) return alert('שגיאה בעדכון מחיר: ' + error.message);
+  await loadInventory();
+}
+
+async function addStock(id){
+  let i = inventory.find(x => x.id === id), q = Number($('qty_'+id).value) || 0;
+  if(!i || q <= 0) return alert('אנא הזן כמות חיובית');
+  let u = { quantity: i.quantity + q, last_date: now('הוספה') }, pt = $('price_'+id).value;
+  if(pt !== ''){
+    let p = Number(pt);
+    if(Number.isFinite(p) && p >= 0 && p !== i.lastPrice){
+      u.prev_price = i.lastPrice;
+      u.last_price = p;
+    }
+  }
+  let {error} = await db.from('inventory').update(u).eq('id', id);
+  if(error) return alert('שגיאה בהוספת מלאי: ' + error.message);
+  await loadInventory();
+}
+
+async function deductStock(id){
+  let i = inventory.find(x => x.id === id), q = Number($('qty_'+id).value) || 0;
+  if(!i || q <= 0) return alert('אנא הזן כמות חיובית');
+  if(q > i.quantity) return alert('אין מספיק יחידות במלאי');
+  let {error} = await db.from('inventory').update({
+    quantity: i.quantity - q,
+    total_consumed: i.totalConsumed + q,
+    last_date: now('הורדה')
+  }).eq('id', id);
+  if(error) return alert('שגיאה בהורדת מלאי: ' + error.message);
+  await loadInventory();
+}
+
+function setCategory(c, b){
+  currentCategory = c;
+  document.querySelectorAll('.chip').forEach(x => x.classList.remove('active'));
+  b.classList.add('active');
+  render();
+}
+
+function openLowStockModal(){
+  let a = inventory.filter(i => i.quantity <= i.minStock);
+  $('lowStockModalBody').innerHTML = a.length ? a.map(i => `<div class="modal-item"><div><strong>${esc(i.name)}</strong><div style="font-size:.75rem;color:#94a3b8">${esc(i.category)} | מינימום: ${i.minStock}</div></div><strong style="color:#f87171">כמות: ${i.quantity}</strong></div>`).join('') : '<div class="empty" style="color:#34d399">אין פריטים בחריגה</div>';
+  $('lowStockModal').classList.add('active');
+}
+
+function closeLowStockModal(){
+  $('lowStockModal').classList.remove('active');
+}
+
+function render(){
+  let s = $('searchBox').value.trim().toLowerCase();
+  let a = inventory.filter(i => i.name.toLowerCase().includes(s) && (currentCategory === 'הכל' || i.category === currentCategory));
+  
+  $('totalTypesCount').textContent = inventory.length;
+  $('totalCount').textContent = inventory.reduce((n, i) => n + i.quantity, 0);
+  let lc = inventory.filter(i => i.quantity <= i.minStock).length;
+  $('lowCount').textContent = lc;
+  $('lowCount').style.color = lc ? '#f87171' : '#34d399';
+  $('totalValue').textContent = '₪' + inventory.reduce((n, i) => n + i.quantity * i.lastPrice, 0).toLocaleString('he-IL', {maximumFractionDigits: 2});
+
+  if(!a.length){
+    $('itemsGrid').innerHTML = '<div class="empty">אין פריטים להצגה כרגע. הוסף פריט חדש למעלה!</div>';
+    return;
+  }
+
+  $('itemsGrid').innerHTML = a.map(i => editingId === i.id ? `
+    <div class="item-card">
+      <div class="edit-form-box">
+        <strong>✏️ עריכת פריט</strong>
+        <label>שם</label><input id="edit_name_${i.id}" value="${esc(i.name)}">
+        <label>קטגוריה</label><select id="edit_cat_${i.id}"><option ${i.category==='ציוד משרדי'?'selected':''}>ציוד משרדי</option><option ${i.category==='נייר ודפוס'?'selected':''}>נייר ודפוס</option><option ${i.category==='אחזקה וניקיון'?'selected':''}>אחזקה וניקיון</option><option ${i.category==='אחר'?'selected':''}>אחר</option></select>
+        <label>מינימום</label><input type="number" id="edit_min_${i.id}" value="${i.minStock}">
+        <div><button class="plus-btn" onclick="saveEdit(${i.id})">שמור</button> <button class="delete-btn" onclick="toggleEdit(${i.id})">ביטול</button></div>
+      </div>
+    </div>` : `
+    <div class="item-card" id="card_${i.id}">
+      <div class="item-header">
+        <div><strong style="font-size:1.1rem">${esc(i.name)}</strong><br><span class="badge">${esc(i.category)}</span></div>
+        <div><button class="edit-btn" onclick="toggleEdit(${i.id})">✏️ עריכה</button> <span class="${i.quantity<=i.minStock?'alert-badge':'ok-badge'}">${i.quantity<=i.minStock?'⚠️ נמוך':'✓ תקין'}</span></div>
+      </div>
+      <div class="item-row"><span>כמות במלאי:</span><strong>${i.quantity}</strong></div>
+      <div class="action-row">
+        <div class="action-inputs"><input type="number" id="qty_${i.id}" placeholder="כמות" min="1"><input type="number" id="price_${i.id}" placeholder="מחיר ₪" step="any" min="0"></div>
+        <div class="action-buttons"><button class="plus-btn" onclick="addStock(${i.id})">+ הוסף סחורה</button><button class="minus-btn" onclick="deductStock(${i.id})">- הורד מהמלאי</button></div>
+      </div>
+      <div class="item-row"><span>מחיר יחידה נוכחי (₪):</span><input class="table-input" type="number" step="any" value="${i.lastPrice}" onchange="updatePrice(${i.id},this.value)"></div>
+      <div class="history-box"><span>🏷️ מחיר קודם:</span><strong style="color:#fbbf24">${i.prevPrice>0?'₪'+i.prevPrice:'אין מחיר קודם'}</strong></div>
+      <div class="history-box"><span>📊 סה"כ שחרורים:</span><strong>${i.totalConsumed}</strong></div>
+      <div class="history-box"><span>🕒 פעילות אחרונה:</span><strong>${esc(i.lastDate)}</strong></div>
+      <div class="item-row"><span>מינימום: ${i.minStock}</span><button class="delete-btn" onclick="deleteItem(${i.id})">מחק פריט</button></div>
+    </div>`).join('');
+}
+
+function exportToExcel(){
+  if(!inventory.length) return alert('אין פריטים לייצוא');
+  let c = '﻿שם פריט,קטגוריה,כמות נוכחית,מינימום,מחיר נוכחי,מחיר קודם,סך הכל שחרורים,פעילות אחרונה\n';
+  inventory.forEach(i => c += `"${i.name.replaceAll('"','""')}","${i.category.replaceAll('"','""')}",${i.quantity},${i.minStock},${i.lastPrice},${i.prevPrice},${i.totalConsumed},"${String(i.lastDate).replaceAll('"','""')}"\n`);
+  let b = new Blob([c], {type:'text/csv;charset=utf-8;'}), u = URL.createObjectURL(b), a = document.createElement('a');
+  a.href = u; a.download = 'inventory_report.csv'; a.click(); URL.revokeObjectURL(u);
+}
+
+$('searchBox').addEventListener('input', render);$('addForm').addEventListener('submit', addItem);
+
+async function initApp(){
+  try {
+    if(!window.supabase) throw new Error('ספריית Supabase לא נטענה');
+    db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    await loadInventory();
+  } catch(e) {
+    console.error(e);
+    $('dbStatus').textContent='🔴 '+e.message;
+    $('dbStatus').style.color='#f87171';
+  }
+}
+
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', initApp);
+else initApp();
+</script>
+</body>
+</html>
