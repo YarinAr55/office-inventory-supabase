@@ -53,3 +53,64 @@
   <div class="stats-grid">
     <div class="stat-card"><div class="stat-icon">🏷️</div><div><span class="stat-label">סה"כ סוגי פריטים</span><div class="stat-value" id="totalTypesCount">0</div></div></div>
     <div class="stat-card"><div class="stat-icon">📦</div><div><span class="stat-label">סה"כ יחידות במלאי</span><div class="stat-value" id="totalCount">0</div></div></div>
+    <div class="stat-card clickable" onclick="openLowStockModal()"><div class="stat-icon">⚠️</div><div><span class="stat-label">פריטים במלאי נמוך</span><div class="stat-value" id="lowCount">0</div></div></div>
+    <div class="stat-card"><div class="stat-icon">💰</div><div><span class="stat-label">שווי כולל של המלאי</span><div class="stat-value" id="totalValue">₪0</div></div></div>
+  </div>
+
+  <div class="filter-bar">
+    <input class="search-box" id="searchBox" placeholder="🔍 חיפוש פריט מהיר...">
+    <div class="chips">
+      <button type="button" class="chip active" onclick="setCategory('הכל',this)">הכל</button>
+      <button type="button" class="chip" onclick="setCategory('ציוד משרדי',this)">ציוד משרדי</button>
+      <button type="button" class="chip" onclick="setCategory('נייר ודפוס',this)">נייר ודפוס</button>
+      <button type="button" class="chip" onclick="setCategory('אחזקה וניקיון',this)">אחזקה וניקיון</option>
+      <button type="button" class="chip" onclick="setCategory('אחר',this)">אחר</option>
+    </div>
+  </div>
+
+  <div class="grid-container" id="itemsGrid"><div class="empty">טוען מלאי...</div></div>
+</div>
+
+<div class="modal-overlay" id="lowStockModal"><div class="modal-content"><div style="display:flex;justify-content:space-between"><strong style="color:#f87171">⚠️ פריטים מתחת למינימום</strong><button class="delete-btn" onclick="closeLowStockModal()">✕</button></div><div id="lowStockModalBody"></div></div></div>
+
+<script>
+const SUPABASE_URL='https://wsxwrzmrzrwcnwowsgve.supabase.co';
+const SUPABASE_KEY='sb_publishable_5Wh7wSRJIXOg4nqLhLyTmg_2Ny1OJ7l';
+let db, inventory = [], currentCategory = 'הכל', editingId = null; 
+const $ = id => document.getElementById(id);
+
+// --- אימות סיסמה מול השרת ב-Supabase בלבד ---
+async function checkPassword(e) {
+  if (e) e.preventDefault();
+  const input = $('passInput').value.trim();
+  const err = $('passError');
+  err.style.display = 'none';
+  $('loginBtn').textContent = 'בודק...';
+
+  try {
+    let { data, error } = await db.from('settings').select('value').eq('key', 'app_password').single();
+    $('loginBtn').textContent = 'התחבר';
+
+    if (!error && data && input === data.value) {
+      localStorage.setItem('inv_app_granted', 'true');
+      $('loginOverlay').style.display = 'none';
+    } else {
+      err.textContent = 'סיסמה שגויה או שהטבלה ב-Supabase טרם נוצרה!';
+      err.style.display = 'block';
+    }
+  } catch (ex) {
+    $('loginBtn').textContent = 'התחבר';
+    err.textContent = 'שגיאה בהתחברות ל-Supabase';
+    err.style.display = 'block';
+  }
+}
+
+function lockApp() {
+  localStorage.removeItem('inv_app_granted');
+  $('passInput').value = '';$('loginOverlay').style.display = 'flex';
+}
+
+if (localStorage.getItem('inv_app_granted') === 'true') {
+  document.addEventListener('DOMContentLoaded', () => {
+    const overlay = $('loginOverlay');
+    if (overlay) overlay.style
