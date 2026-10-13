@@ -60,3 +60,133 @@
   <div class="filter-bar">
     <input class="search-box" id="searchBox" placeholder="🔍 חיפוש פריט מהיר...">
     <div class="chips">
+      <button type="button" class="chip active" onclick="setCategory('הכל',this)">הכל</button>
+      <button type="button" class="chip" onclick="setCategory('ציוד משרדי',this)">ציוד משרדי</button>
+      <button type="button" class="chip" onclick="setCategory('נייר ודפוס',this)">נייר ודפוס</button>
+      <button type="button" class="chip" onclick="setCategory('אחזקה וניקיון',this)">אחזקה וניקיון</option>
+      <button type="button" class="chip" onclick="setCategory('אחר',this)">אחר</option>
+    </div>
+  </div>
+
+  <div class="grid-container" id="itemsGrid"><div class="empty">טוען מלאי...</div></div>
+</div>
+
+<div class="modal-overlay" id="lowStockModal"><div class="modal-content"><div style="display:flex;justify-content:space-between"><strong style="color:#f87171">⚠️ פריטים מתחת למינימום</strong><button class="delete-btn" onclick="closeLowStockModal()">✕</button></div><div id="lowStockModalBody"></div></div></div>
+
+<script>
+const SUPABASE_URL='https://wsxwrzmrzrwcnwowsgve.supabase.co';
+const SUPABASE_KEY='sb_publishable_5Wh7wSRJIXOg4nqLhLyTmg_2Ny1OJ7l';
+let db, inventory = [], currentCategory = 'הכל', editingId = null; 
+const $ = id => document.getElementById(id);
+
+function checkPassword(e) {
+  if (e) e.preventDefault();
+  const input = ($('passInput').value || '').trim();
+  if (input === '1234567') {
+    localStorage.setItem('inv_user_logged', 'true');
+    $('loginOverlay').style.display = 'none';$('passError').style.display = 'none';
+  } else {
+    $('passError').style.display = 'block';
+  }
+}
+
+function lockApp() {
+  localStorage.removeItem('inv_user_logged');
+  if ($('passInput'))$('passInput').value = '';
+  if ($('loginOverlay'))$('loginOverlay').style.display = 'flex';
+}
+
+if (localStorage.getItem('inv_user_logged') === 'true') {
+  document.addEventListener('DOMContentLoaded', () => {
+    const overlay = $('loginOverlay');
+    if (overlay) overlay.style.display = 'none';
+  });
+}
+
+function esc(v){return String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;')}
+function mapRow(r){
+  return {
+    id: Number(r.id),
+    name: r.name || '',
+    category: r.category || 'אחר',
+    warehouse: r.warehouse || r.warehouse_location || 'לא הוגדר',
+    quantity: Number(r.quantity || 0),
+    minStock: Number(r.min_stock ?? r.minStock ?? 0),
+    lastPrice: Number(r.last_price ?? r.lastPrice ?? 0),
+    prevPrice: Number(r.prev_price ?? r.prevPrice ?? 0),
+    totalConsumed: Number(r.total_consumed ?? r.totalConsumed ?? 0),
+    lastDate: r.last_date ?? r.lastDate ?? 'טרם עודכן'
+  };
+}
+function now(a){return a+': '+new Date().toLocaleString('he-IL')}
+
+async function loadInventory(){
+  try {
+    $('dbStatus').textContent='🟡 טוען נתונים מ-Supabase...';
+    let {data, error} = await db.from('inventory').select('*').order('id', {ascending: false});
+    if(error) throw error;
+    inventory = (data || []).map(mapRow);
+    $('dbStatus').textContent='🟢 מחובר ל-Supabase';
+    $('dbStatus').style.color='#34d399';
+    render();
+  } catch(e) {
+    console.error(e);
+    $('dbStatus').textContent='🔴 שגיאה: '+e.message;
+    $('dbStatus').style.color='#f87171';
+    $('itemsGrid').innerHTML='<div class="empty">'+esc(e.message)+'</div>';
+  }
+}
+
+async function addItem(e){
+  e.preventDefault();
+  const name = $('newName').value.trim();
+  if(!name) return;
+
+  const whVal = $('newWarehouse').value.trim() || 'לא הוגדר';
+
+  const newItem = {
+    name: name,
+    category: $('newCategory').value,
+    warehouse: whVal,
+    warehouse_location: whVal,
+    quantity: Number($('newQuantity').value) || 0,
+    min_stock: Number($('newMin').value) || 0,
+    last_price: Number($('newPrice').value) || 0,
+    prev_price: 0,
+    total_consumed: 0,
+    last_date: 'טרם עודכן'
+  };
+
+  let { data, error } = await db.from('inventory').insert([newItem]).select();
+  
+  if(error) {
+    delete newItem.warehouse;
+    let retry = await db.from('inventory').insert([newItem]).select();
+    if(retry.error) {
+      alert('שגיאה בהוספה ל-Supabase:\n' + retry.error.message);
+      console.error(retry.error);
+      return;
+    }
+  }
+
+  $('newName').value = '';
+  $('newWarehouse').value = '';$('newQuantity').value = '0';
+  $('newMin').value = '5';$('newPrice').value = '0';
+  await loadInventory();
+}
+
+async function deleteItem(id){
+  if(!confirm('האם למחוק את הפריט לצמיתות?')) return;
+  let {error} = await db.from('inventory').delete().eq('id', id);
+  if(error) return alert(error.message);
+  await loadInventory();
+}
+
+function toggleEdit(id){
+  editingId = editingId === id ? null : id;
+  render();
+}
+
+async function saveEdit(id){
+  let name = $('edit_name_'+id).value.trim();
+  if(!name) return alert('שם הפריט
