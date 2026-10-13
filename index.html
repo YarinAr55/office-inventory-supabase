@@ -6,17 +6,43 @@
 <title>מערכת ניהול מלאי חכמה</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-*{box-sizing:border-box} body{margin:0;padding:0 0 50px;background:radial-gradient(circle at top,#1e1b4b,#0f172a 60%);color:#f8fafc;font-family:'Inter','Segoe UI',Tahoma,Arial,sans-serif;min-height:100vh} header{background:linear-gradient(135deg,rgba(30,27,75,.9),rgba(49,46,129,.9));padding:20px 40px;position:sticky;top:0;z-index:100;box-shadow:0 10px 30px #0005}.header-content{max-width:1200px;margin:auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}h1{font-size:1.5rem;margin:0 0 4px}p{color:#c7d2fe;font-size:.85rem;margin:2px 0}.container{max-width:1200px;margin:20px auto;padding:0 20px}.card{background:#1e293be6;border-radius:16px;padding:24px;margin-bottom:25px;border:2px solid #6366f166;box-shadow:0 10px 25px #0006}.section-title{font-size:1.2rem;font-weight:700;margin-bottom:16px}.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;align-items:end}.input-group{display:flex;flex-direction:column;gap:6px}label{font-size:.8rem;color:#cbd5e1;font-weight:700}input,select{padding:12px;border-radius:8px;border:1px solid #6366f180;font-size:.95rem;background:#0f172ae6;color:#fff;width:100%}button{cursor:pointer}.primary-btn{background:#6366f1;color:#fff;border:0;border-radius:8px;padding:12px;font-weight:700;width:100%}.export-btn{background:#059669;color:#fff;border:0;border-radius:8px;padding:10px 16px}.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:20px}.stat-card{background:#1e293bb3;border-radius:14px;padding:18px;border:1px solid #334155;display:flex;align-items:center;gap:14px}.stat-card.clickable{cursor:pointer}.stat-icon{width:42px;height:42px;border-radius:10px;background:#6366f126;display:flex;align-items:center;justify-content:center}.stat-label{font-size:.8rem;color:#94a3b8;font-weight:600}.stat-value{font-size:1.5rem;font-weight:800}.filter-bar{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap}.search-box{flex:2}.chips{display:flex;gap:6px;flex:3;flex-wrap:wrap}.chip{padding:8px 14px;border-radius:20px;background:#1e293b;color:#94a3b8;border:1px solid #334155}.chip.active{background:#6366f1;color:#fff}.grid-container{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}.item-card{background:#1e293bd9;border-radius:14px;padding:16px;border:1px solid #334155;display:flex;flex-direction:column;gap:12px}.item-header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid #334155;padding-bottom:10px}.badge{background:#312e8199;color:#c7d2fe;padding:3px 8px;border-radius:4px;font-size:.75rem}.ok-badge,.alert-badge{padding:3px 6px;border-radius:4px;font-size:.7rem;font-weight:700}.ok-badge{background:#064e3b99;color:#34d399}.alert-badge{background:#7f1d1d99;color:#fca5a5}.item-row{display:flex;justify-content:space-between;align-items:center;font-size:.85rem;color:#94a3b8;gap:8px}.table-input{padding:6px;text-align:center;font-size:.85rem}.action-row{background:#0f172a80;padding:8px;border-radius:8px}.action-inputs,.action-buttons{display:flex;gap:6px;margin-top:6px}.plus-btn,.minus-btn,.edit-btn,.delete-btn{border-radius:6px;padding:7px 9px;font-weight:600}.plus-btn{background:#10b981;color:#fff;border:0}.minus-btn{background:#ef4444;color:#fff;border:0}.edit-btn{background:#3730a3;color:#c7d2fe;border:1px solid #6366f1}.delete-btn{background:#7f1d1d;color:#fecaca;border:1px solid #ef444466}.history-box{background:#0f172ab3;border-radius:8px;padding:8px;font-size:.75rem;color:#cbd5e1;display:flex;justify-content:space-between}.edit-form-box{background:#0f172ae6;border:1px solid #6366f1;border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px}.modal-overlay{position:fixed;inset:0;background:#0f172acc;display:none;align-items:center;justify-content:center;z-index:1000}.modal-overlay.active{display:flex}.modal-content{background:#1e293b;border:1px solid #6366f166;border-radius:16px;width:90%;max-width:550px;max-height:80vh;overflow:auto;padding:18px}.modal-item{background:#0f172a99;border:1px solid #ef444466;border-radius:8px;padding:12px;margin-top:8px;display:flex;justify-content:space-between;gap:10px}.empty{grid-column:1/-1;text-align:center;color:#64748b;padding:30px}@media(max-width:650px){header{padding:15px}.container{padding:0 10px}.form{grid-template-columns:1fr}.grid-container{grid-template-columns:1fr}}
-</style>
-</head>
+*{box-sizing:border-box} body{margin:0;padding:0 0 50px;background:radial-gradient(circle at top,#1e1b4b,#0f172a 60%);color:#f8fafc;font-family:'Inter','Segoe UI',Tahoma,Arial,sans-serif;min-height:100vh} header{background:linear-gradient(135deg,rgba(30,27,75,.9),rgba(49,46,129,.9));padding:20px 40px;position:sticky;top:0;z-index:100;box-shadow:0 10px 30px #0005}.header-content{max-width:1200px;margin:auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}h1{font-size:1.5rem;margin:0 0 4px}p{color:#c7d2fe;font-size:.85rem;margin:2px 0}.container{max-width:1200px;margin:20px auto;padding:0 20px}.card{background:#1e293be6;border-radius:16px;padding:24px;margin-bottom:25px;border:2px solid #6366f166;box-shadow:0 10px 25px #0006}.section-title{font-size:1.2rem;font-weight:700;margin-bottom:16px}.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;align-items:end}.input-group{display:flex;flex-direction:column;gap:6px}label{font-size:.8rem;color:#cbd5e1;font-weight:700}input,select{padding:12px;border-radius:8px;border:1px solid #6366f180;font-size:.95rem;background:#0f172ae6;color:#fff;width:100%}button{cursor:pointer}.primary-btn{background:#6366f1;color:#fff;border:0;border-radius:8px;padding:12px;font-weight:700;width:100%}.export-btn{background:#059669;color:#fff;border:0;border-radius:8px;padding:10px 16px}.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:20px}.stat-card{background:#1e293bb3;border-radius:14px;padding:18px;border:1px solid #334155;display:flex;align-items:center;gap:14px}.stat-card.clickable{cursor:pointer}.stat-icon{width:42px;height:42px;border-radius:10px;background:#6366f126;display:flex;align-items:center;justify-content:center;font-size:1.2rem}.stat-label{font-size:.8rem;color:#94a3b8;font-weight:600}.stat-value{font-size:1.4rem;font-weight:800}.filter-bar{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap}.search-box{flex:2}.chips{display:flex;gap:6px;flex:3;flex-wrap:wrap}.chip{padding:8px 14px;border-radius:20px;background:#1e293b;color:#94a3b8;border:1px solid #334155}.chip.active{background:#6366f1;color:#fff}.grid-container{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}.item-card{background:#1e293bd9;border-radius:14px;padding:16px;border:1px solid #334155;display:flex;flex-direction:column;gap:12px}.item-header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid #334155;padding-bottom:10px}.badge{background:#312e8199;color:#c7d2fe;padding:3px 8px;border-radius:4px;font-size:.75rem}.badge-warehouse{background:#0284c799;color:#e0f2fe;padding:3px 8px;border-radius:4px;font-size:.75rem}.ok-badge,.alert-badge{padding:3px 6px;border-radius:4px;font-size:.7rem;font-weight:700}.ok-badge{background:#064e3b99;color:#34d399}.alert-badge{background:#7f1d1d99;color:#fca5a5}.item-row{display:flex;justify-content:space-between;align-items:center;font-size:.85rem;color:#94a3b8;gap:8px}.table-input{padding:6px;text-align:center;font-size:.85rem}.action-row{background:#0f172a80;padding:8px;border-radius:8px}.action-inputs,.action-buttons{display:flex;gap:6px;margin-top:6px}.plus-btn,.minus-btn,.edit-btn,.delete-btn{border-radius:6px;padding:7px 9px;font-weight:600}.plus-btn{background:#10b981;color:#fff;border:0}.minus-btn{background:#ef4444;color:#fff;border:0}.edit-btn{background:#3730a3;color:#c7d2fe;border:1px solid #6366f1}.delete-btn{background:#7f1d1d;color:#fecaca;border:1px solid #ef444466}.history-box{background:#0f172ab3;border-radius:8px;padding:8px;font-size:.75rem;color:#cbd5e1;display:flex;justify-content:space-between}.edit-form-box{background:#0f172ae6;border:1px solid #6366f1;border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px}.modal-overlay{position:fixed;inset:0;background:#0f172acc;display:none;align-items:center;justify-content:center;z-index:1000}.modal-overlay.active{display:flex}.modal-content{background:#1e293b;border:1px solid #6366f166;border-radius:16px;width:90%;max-width:550px;max-height:80vh;overflow:auto;padding:18px}.modal-item{background:#0f172a99;border:1px solid #ef444466;border-radius:8px;padding:12px;margin-top:8px;display:flex;justify-content:space-between;gap:10px}.empty{grid-column:1/-1;text-align:center;color:#64748b;padding:30px}@media(max-width:650px){header{padding:15px}.container{padding:0 10px}.form{grid-template-columns:1fr}.grid-container{grid-template-columns:1fr}}
+</style></head>
 <body>
-<header><div class="header-content"><div><h1>📦 ניהול מלאי חכם</h1><p>מערכת מלאי משותפת בענן</p><p id="dbStatus">🟡 מתחבר ל-Supabase...</p></div><button type="button" class="export-btn" onclick="exportToExcel()">📥 ייצוא לאקסל</button></div></header>
+
+<!-- מסך נעילה בסיסמה בלבד -->
+<div id="loginOverlay" style="position:fixed; inset:0; background:#0f172af0; display:flex; align-items:center; justify-content:center; z-index:9999;">
+  <div class="card" style="max-width:360px; width:90%; text-align:center; margin:0;">
+    <div class="section-title">🔐 כניסה למערכת</div>
+    <form onsubmit="checkPassword(event)" style="display:flex; flex-direction:column; gap:12px;">
+      <input type="password" id="passInput" placeholder="הכנס סיסמה..." style="text-align:center;" required autocomplete="current-password">
+      <button type="submit" class="primary-btn">התחבר</button>
+      <p id="passError" style="color:#f87171; margin:0; display:none; font-size:0.85rem;">סיסמה שגויה!</p>
+    </form>
+  </div>
+</div>
+
+<header>
+  <div class="header-content">
+    <div>
+      <h1>📦 ניהול מלאי חכם</h1>
+      <p>מערכת מלאי משותפת בענן</p>
+      <p id="dbStatus">🟡 מתחבר ל-Supabase...</p>
+    </div>
+    <div style="display:flex; gap:10px; align-items:center;">
+      <button type="button" class="export-btn" onclick="exportToExcel()">📥 ייצוא לאקסל</button>
+      <button type="button" class="delete-btn" onclick="lockApp()">🔒 נעילה</button>
+    </div>
+  </div>
+</header>
+
 <div class="container">
   <div class="card">
     <div class="section-title">➕ הוספת פריט חדש למלאי</div>
     <form id="addForm" class="form">
       <div class="input-group"><label>שם הפריט</label><input id="newName" required placeholder="למשל: דפים A4"></div>
       <div class="input-group"><label>קטגוריה</label><select id="newCategory"><option>ציוד משרדי</option><option>נייר ודפוס</option><option>אחזקה וניקיון</option><option>אחר</option></select></div>
+      <div class="input-group"><label>שם המחסן / מיקום</label><input id="newWarehouse" placeholder="למשל: מחסן מרכזי, מדף ב'..."></div>
       <div class="input-group"><label>כמות התחלתית</label><input type="number" id="newQuantity" value="0" min="0" required></div>
       <div class="input-group"><label>מינימום התראה</label><input type="number" id="newMin" value="5" min="0"></div>
       <div class="input-group"><label>מחיר יחידה (₪)</label><input type="number" id="newPrice" value="0" step="any" min="0"></div>
@@ -25,8 +51,9 @@
   </div>
 
   <div class="stats-grid">
+    <div class="stat-card"><div class="stat-icon">🏷️</div><div><span class="stat-label">סה"כ סוגי פריטים</span><div class="stat-value" id="totalTypesCount">0</div></div></div>
     <div class="stat-card"><div class="stat-icon">📦</div><div><span class="stat-label">סה"כ יחידות במלאי</span><div class="stat-value" id="totalCount">0</div></div></div>
-    <div class="stat-card clickable" onclick="openLowStockModal()"><div class="stat-icon">⚠️</div><div><span class="stat-label">פריטים במלאי נמוך (לחץ לצפייה)</span><div class="stat-value" id="lowCount">0</div></div></div>
+    <div class="stat-card clickable" onclick="openLowStockModal()"><div class="stat-icon">⚠️</div><div><span class="stat-label">פריטים במלאי נמוך</span><div class="stat-value" id="lowCount">0</div></div></div>
     <div class="stat-card"><div class="stat-icon">💰</div><div><span class="stat-label">שווי כולל של המלאי</span><div class="stat-value" id="totalValue">₪0</div></div></div>
   </div>
 
@@ -36,8 +63,8 @@
       <button type="button" class="chip active" onclick="setCategory('הכל',this)">הכל</button>
       <button type="button" class="chip" onclick="setCategory('ציוד משרדי',this)">ציוד משרדי</button>
       <button type="button" class="chip" onclick="setCategory('נייר ודפוס',this)">נייר ודפוס</button>
-      <button type="button" class="chip" onclick="setCategory('אחזקה וניקיון',this)">אחזקה וניקיון</button>
-      <button type="button" class="chip" onclick="setCategory('אחר',this)">אחר</button>
+      <button type="button" class="chip" onclick="setCategory('אחזקה וניקיון',this)">אחזקה וניקיון</option>
+      <button type="button" class="chip" onclick="setCategory('אחר',this)">אחר</option>
     </div>
   </div>
 
@@ -52,25 +79,33 @@ const SUPABASE_KEY='sb_publishable_5Wh7wSRJIXOg4nqLhLyTmg_2Ny1OJ7l';
 let db, inventory = [], currentCategory = 'הכל', editingId = null; 
 const $ = id => document.getElementById(id);
 
-async function checkPassword() {
-  // Hash עבור הסיסמה: 1234567
-  const correctHash = 'f7c3bc1d808e04732adf679965ccc34ca7ae344131f4f97188b1794bcfd0c5f8';
-  
-  let password = prompt("🔐 נא להזין סיסמה לכניסה למערכת:");
-  if (password === null) {
-    document.body.innerHTML = "<h2 style='text-align:center;margin-top:100px;color:#f87171;'>גישה בוטלה. יש לרענן את העמוד כדי לנסות שוב.</h2>";
-    throw new Error("Access denied");
+function checkPassword(e) {
+  if (e) e.preventDefault();
+  const input = $('passInput').value.trim();
+  if (input === '1234567') {
+    localStorage.setItem('stable_inv_auth', 'active');
+    localStorage.setItem('inv_granted_login', 'true');
+    localStorage.setItem('auth_pass_token', 'active_session_granted');
+    $('loginOverlay').style.display = 'none';$('passError').style.display = 'none';
+  } else {
+    $('passError').style.display = 'block';
   }
+}
 
-  const msgBuffer = new TextEncoder().encode(password);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const passwordHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+function lockApp() {
+  localStorage.removeItem('stable_inv_auth');
+  localStorage.removeItem('inv_granted_login');
+  localStorage.removeItem('auth_pass_token');
+  $('passInput').value = '';$('loginOverlay').style.display = 'flex';
+}
 
-  if (passwordHash !== correctHash) {
-    alert('סיסמה שגויה!');
-    location.reload();
-  }
+if (localStorage.getItem('stable_inv_auth') === 'active' || 
+    localStorage.getItem('inv_granted_login') === 'true' || 
+    localStorage.getItem('auth_pass_token') === 'active_session_granted') {
+  document.addEventListener('DOMContentLoaded', () => {
+    const overlay = $('loginOverlay');
+    if (overlay) overlay.style.display = 'none';
+  });
 }
 
 function esc(v){return String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;')}
@@ -79,6 +114,7 @@ function mapRow(r){
     id: Number(r.id),
     name: r.name || '',
     category: r.category || 'אחר',
+    warehouse: r.warehouse || r.warehouse_location || 'לא הוגדר',
     quantity: Number(r.quantity || 0),
     minStock: Number(r.min_stock ?? r.minStock ?? 0),
     lastPrice: Number(r.last_price ?? r.lastPrice ?? 0),
@@ -114,6 +150,7 @@ async function addItem(e){
   const newItem = {
     name: name,
     category: $('newCategory').value,
+    warehouse: $('newWarehouse').value.trim() || 'לא הוגדר',
     quantity: Number($('newQuantity').value) || 0,
     min_stock: Number($('newMin').value) || 0,
     last_price: Number($('newPrice').value) || 0,
@@ -129,7 +166,8 @@ async function addItem(e){
     return;
   }
 
-  $('newName').value = '';$('newQuantity').value = '0';
+  $('newName').value = '';
+  $('newWarehouse').value = '';$('newQuantity').value = '0';
   $('newMin').value = '5';$('newPrice').value = '0';
   await loadInventory();
 }
@@ -152,6 +190,7 @@ async function saveEdit(id){
   let {error} = await db.from('inventory').update({
     name: name,
     category: $('edit_cat_'+id).value,
+    warehouse: $('edit_wh_'+id).value.trim() || 'לא הוגדר',
     min_stock: Number($('edit_min_'+id).value) || 0
   }).eq('id', id);
   if(error) return alert(error.message);
@@ -210,7 +249,7 @@ function setCategory(c, b){
 
 function openLowStockModal(){
   let a = inventory.filter(i => i.quantity <= i.minStock);
-  $('lowStockModalBody').innerHTML = a.length ? a.map(i => `<div class="modal-item"><div><strong>${esc(i.name)}</strong><div style="font-size:.75rem;color:#94a3b8">${esc(i.category)} | מינימום: ${i.minStock}</div></div><strong style="color:#f87171">כמות: ${i.quantity}</strong></div>`).join('') : '<div class="empty" style="color:#34d399">אין פריטים בחריגה</div>';
+  $('lowStockModalBody').innerHTML = a.length ? a.map(i => `<div class="modal-item"><div><strong>${esc(i.name)}</strong><div style="font-size:.75rem;color:#94a3b8">${esc(i.category)} | מחסן: ${esc(i.warehouse)} | מינימום: ${i.minStock}</div></div><strong style="color:#f87171">כמות: ${i.quantity}</strong></div>`).join('') : '<div class="empty" style="color:#34d399">אין פריטים בחריגה</div>';
   $('lowStockModal').classList.add('active');
 }
 
@@ -222,6 +261,7 @@ function render(){
   let s = $('searchBox').value.trim().toLowerCase();
   let a = inventory.filter(i => i.name.toLowerCase().includes(s) && (currentCategory === 'הכל' || i.category === currentCategory));
   
+  $('totalTypesCount').textContent = inventory.length;
   $('totalCount').textContent = inventory.reduce((n, i) => n + i.quantity, 0);
   let lc = inventory.filter(i => i.quantity <= i.minStock).length;
   $('lowCount').textContent = lc;
@@ -239,13 +279,14 @@ function render(){
         <strong>✏️ עריכת פריט</strong>
         <label>שם</label><input id="edit_name_${i.id}" value="${esc(i.name)}">
         <label>קטגוריה</label><select id="edit_cat_${i.id}"><option ${i.category==='ציוד משרדי'?'selected':''}>ציוד משרדי</option><option ${i.category==='נייר ודפוס'?'selected':''}>נייר ודפוס</option><option ${i.category==='אחזקה וניקיון'?'selected':''}>אחזקה וניקיון</option><option ${i.category==='אחר'?'selected':''}>אחר</option></select>
+        <label>מחסן / מיקום</label><input id="edit_wh_${i.id}" value="${esc(i.warehouse)}">
         <label>מינימום</label><input type="number" id="edit_min_${i.id}" value="${i.minStock}">
         <div><button class="plus-btn" onclick="saveEdit(${i.id})">שמור</button> <button class="delete-btn" onclick="toggleEdit(${i.id})">ביטול</button></div>
       </div>
     </div>` : `
     <div class="item-card" id="card_${i.id}">
       <div class="item-header">
-        <div><strong style="font-size:1.1rem">${esc(i.name)}</strong><br><span class="badge">${esc(i.category)}</span></div>
+        <div><strong style="font-size:1.1rem">${esc(i.name)}</strong><br><span class="badge">${esc(i.category)}</span> <span class="badge-warehouse">🏭 ${esc(i.warehouse)}</span></div>
         <div><button class="edit-btn" onclick="toggleEdit(${i.id})">✏️ עריכה</button> <span class="${i.quantity<=i.minStock?'alert-badge':'ok-badge'}">${i.quantity<=i.minStock?'⚠️ נמוך':'✓ תקין'}</span></div>
       </div>
       <div class="item-row"><span>כמות במלאי:</span><strong>${i.quantity}</strong></div>
@@ -263,27 +304,24 @@ function render(){
 
 function exportToExcel(){
   if(!inventory.length) return alert('אין פריטים לייצוא');
-  let c = '﻿שם פריט,קטגוריה,כמות נוכחית,מינימום,מחיר נוכחי,מחיר קודם,סך הכל שחרורים,פעילות אחרונה\n';
-  inventory.forEach(i => c += `"${i.name.replaceAll('"','""')}","${i.category.replaceAll('"','""')}",${i.quantity},${i.minStock},${i.lastPrice},${i.prevPrice},${i.totalConsumed},"${String(i.lastDate).replaceAll('"','""')}"\n`);
+  let sortedInventory = [...inventory].sort((a, b) => a.warehouse.localeCompare(b.warehouse, 'he'));
+  let c = '﻿מחסן,שם פריט,קטגוריה,כמות נוכחית,מינימום,מחיר נוכחי,מחיר קודם,סך הכל שחרורים,פעילות אחרונה\n';
+  sortedInventory.forEach(i => c += `"${i.warehouse.replaceAll('"','""')}","${i.name.replaceAll('"','""')}","${i.category.replaceAll('"','""')}",${i.quantity},${i.minStock},${i.lastPrice},${i.prevPrice},${i.totalConsumed},"${String(i.lastDate).replaceAll('"','""')}"\n`);
   let b = new Blob([c], {type:'text/csv;charset=utf-8;'}), u = URL.createObjectURL(b), a = document.createElement('a');
-  a.href = u; a.download = 'inventory_report.csv'; a.click(); URL.revokeObjectURL(u);
+  a.href = u; a.download = 'inventory_report_by_warehouse.csv'; a.click(); URL.revokeObjectURL(u);
 }
 
 $('searchBox').addEventListener('input', render);$('addForm').addEventListener('submit', addItem);
 
 async function initApp(){
   try {
-    await checkPassword();
-
     if(!window.supabase) throw new Error('ספריית Supabase לא נטענה');
     db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     await loadInventory();
   } catch(e) {
-    if(e.message !== "Access denied") {
-      console.error(e);
-      $('dbStatus').textContent='🔴 '+e.message;
-      $('dbStatus').style.color='#f87171';
-    }
+    console.error(e);
+    $('dbStatus').textContent='🔴 '+e.message;
+    $('dbStatus').style.color='#f87171';
   }
 }
 
