@@ -7,7 +7,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box} body{margin:0;padding:0 0 50px;background:radial-gradient(circle at top,#1e1b4b,#0f172a 60%);color:#f8fafc;font-family:'Inter','Segoe UI',Tahoma,Arial,sans-serif;min-height:100vh} header{background:linear-gradient(135deg,rgba(30,27,75,.9),rgba(49,46,129,.9));padding:20px 40px;position:sticky;top:0;z-index:100;box-shadow:0 10px 30px #0005}.header-content{max-width:1200px;margin:auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}h1{font-size:1.5rem;margin:0 0 4px}p{color:#c7d2fe;font-size:.85rem;margin:2px 0}.container{max-width:1200px;margin:20px auto;padding:0 20px}.card{background:#1e293be6;border-radius:16px;padding:24px;margin-bottom:25px;border:2px solid #6366f166;box-shadow:0 10px 25px #0006}.section-title{font-size:1.2rem;font-weight:700;margin-bottom:16px}.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;align-items:end}.input-group{display:flex;flex-direction:column;gap:6px}label{font-size:.8rem;color:#cbd5e1;font-weight:700}input,select{padding:12px;border-radius:8px;border:1px solid #6366f180;font-size:.95rem;background:#0f172ae6;color:#fff;width:100%}button{cursor:pointer}.primary-btn{background:#6366f1;color:#fff;border:0;border-radius:8px;padding:12px;font-weight:700;width:100%}.export-btn{background:#059669;color:#fff;border:0;border-radius:8px;padding:10px 16px}.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:20px}.stat-card{background:#1e293bb3;border-radius:14px;padding:18px;border:1px solid #334155;display:flex;align-items:center;gap:14px}.stat-card.clickable{cursor:pointer}.stat-icon{width:42px;height:42px;border-radius:10px;background:#6366f126;display:flex;align-items:center;justify-content:center}.stat-label{font-size:.8rem;color:#94a3b8;font-weight:600}.stat-value{font-size:1.5rem;font-weight:800}.filter-bar{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap}.search-box{flex:2}.chips{display:flex;gap:6px;flex:3;flex-wrap:wrap}.chip{padding:8px 14px;border-radius:20px;background:#1e293b;color:#94a3b8;border:1px solid #334155}.chip.active{background:#6366f1;color:#fff}.grid-container{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}.item-card{background:#1e293bd9;border-radius:14px;padding:16px;border:1px solid #334155;display:flex;flex-direction:column;gap:12px}.item-header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid #334155;padding-bottom:10px}.badge{background:#312e8199;color:#c7d2fe;padding:3px 8px;border-radius:4px;font-size:.75rem}.ok-badge,.alert-badge{padding:3px 6px;border-radius:4px;font-size:.7rem;font-weight:700}.ok-badge{background:#064e3b99;color:#34d399}.alert-badge{background:#7f1d1d99;color:#fca5a5}.item-row{display:flex;justify-content:space-between;align-items:center;font-size:.85rem;color:#94a3b8;gap:8px}.table-input{padding:6px;text-align:center;font-size:.85rem}.action-row{background:#0f172a80;padding:8px;border-radius:8px}.action-inputs,.action-buttons{display:flex;gap:6px;margin-top:6px}.plus-btn,.minus-btn,.edit-btn,.delete-btn{border-radius:6px;padding:7px 9px;font-weight:600}.plus-btn{background:#10b981;color:#fff;border:0}.minus-btn{background:#ef4444;color:#fff;border:0}.edit-btn{background:#3730a3;color:#c7d2fe;border:1px solid #6366f1}.delete-btn{background:#7f1d1d;color:#fecaca;border:1px solid #ef444466}.history-box{background:#0f172ab3;border-radius:8px;padding:8px;font-size:.75rem;color:#cbd5e1;display:flex;justify-content:space-between}.edit-form-box{background:#0f172ae6;border:1px solid #6366f1;border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px}.modal-overlay{position:fixed;inset:0;background:#0f172acc;display:none;align-items:center;justify-content:center;z-index:1000}.modal-overlay.active{display:flex}.modal-content{background:#1e293b;border:1px solid #6366f166;border-radius:16px;width:90%;max-width:550px;max-height:80vh;overflow:auto;padding:18px}.modal-item{background:#0f172a99;border:1px solid #ef444466;border-radius:8px;padding:12px;margin-top:8px;display:flex;justify-content:space-between;gap:10px}.empty{grid-column:1/-1;text-align:center;color:#64748b;padding:30px}@media(max-width:650px){header{padding:15px}.container{padding:0 10px}.form{grid-template-columns:1fr}.grid-container{grid-template-columns:1fr}}
-</style></head>
+</style>
+</head>
 <body>
 <header><div class="header-content"><div><h1>📦 ניהול מלאי חכם</h1><p>מערכת מלאי משותפת בענן</p><p id="dbStatus">🟡 מתחבר ל-Supabase...</p></div><button type="button" class="export-btn" onclick="exportToExcel()">📥 ייצוא לאקסל</button></div></header>
 <div class="container">
@@ -50,6 +51,27 @@ const SUPABASE_URL='https://wsxwrzmrzrwcnwowsgve.supabase.co';
 const SUPABASE_KEY='sb_publishable_5Wh7wSRJIXOg4nqLhLyTmg_2Ny1OJ7l';
 let db, inventory = [], currentCategory = 'הכל', editingId = null; 
 const $ = id => document.getElementById(id);
+
+async function checkPassword() {
+  // Hash עבור הסיסמה: 1234567
+  const correctHash = 'f7c3bc1d808e04732adf679965ccc34ca7ae344131f4f97188b1794bcfd0c5f8';
+  
+  let password = prompt("🔐 נא להזין סיסמה לכניסה למערכת:");
+  if (password === null) {
+    document.body.innerHTML = "<h2 style='text-align:center;margin-top:100px;color:#f87171;'>גישה בוטלה. יש לרענן את העמוד כדי לנסות שוב.</h2>";
+    throw new Error("Access denied");
+  }
+
+  const msgBuffer = new TextEncoder().encode(password);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const passwordHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+  if (passwordHash !== correctHash) {
+    alert('סיסמה שגויה!');
+    location.reload();
+  }
+}
 
 function esc(v){return String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;')}
 function mapRow(r){
@@ -251,13 +273,17 @@ $('searchBox').addEventListener('input', render);$('addForm').addEventListener('
 
 async function initApp(){
   try {
+    await checkPassword();
+
     if(!window.supabase) throw new Error('ספריית Supabase לא נטענה');
     db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     await loadInventory();
   } catch(e) {
-    console.error(e);
-    $('dbStatus').textContent='🔴 '+e.message;
-    $('dbStatus').style.color='#f87171';
+    if(e.message !== "Access denied") {
+      console.error(e);
+      $('dbStatus').textContent='🔴 '+e.message;
+      $('dbStatus').style.color='#f87171';
+    }
   }
 }
 
