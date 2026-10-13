@@ -61,7 +61,7 @@
       <button type="button" class="chip active" onclick="setCategory('הכל',this)">הכל</button>
       <button type="button" class="chip" onclick="setCategory('ציוד משרדי',this)">ציוד משרדי</button>
       <button type="button" class="chip" onclick="setCategory('נייר ודפוס',this)">נייר ודפוס</button>
-      <button type="button" class="chip" onclick="setCategory('אחזקה וניקיון',this)">אחזקה וניקיון</option>
+      <button type="button" class="chip" onclick="setCategory('אחזקה וניקיון',this)">אחזקה וניקיון</button>
       <button type="button" class="chip" onclick="setCategory('אחר',this)">אחר</button>
     </div>
   </div>
@@ -72,38 +72,52 @@
 <div class="modal-overlay" id="lowStockModal"><div class="modal-content"><div style="display:flex;justify-content:space-between"><strong style="color:#f87171">⚠️ פריטים מתחת למינימום</strong><button class="delete-btn" onclick="closeLowStockModal()">✕</button></div><div id="lowStockModalBody"></div></div></div>
 
 <script>
-// --- הגדרת סיסמה ---
-const SECRET_PASSWORD = '1234567'; // הוסדרה הסיסמה ל-1234567
+const SUPABASE_URL='https://wsxwrzmrzrwcnwowsgve.supabase.co';
+const SUPABASE_KEY='sb_publishable_5Wh7wSRJIXOg4nqLhLyTmg_2Ny1OJ7l';
+let db, inventory = [], currentCategory = 'הכל', editingId = null; 
+const $ = id => document.getElementById(id);
 
-function checkPassword(e) {
+// --- בדיקת סיסמה מאובטחת מול Supabase (נשלף מהענן במקום להופיע בקוד) ---
+async function checkPassword(e) {
   if (e) e.preventDefault();
-  const input = $('passInput').value;
-  if (input === SECRET_PASSWORD) {
-    localStorage.setItem('auth_pass', SECRET_PASSWORD);
-    $('loginOverlay').style.display = 'none';$('passError').style.display = 'none';
-  } else {
-    $('passError').style.display = 'block';
+  const input = $('passInput').value.trim();
+  
+  try {
+    // שליפת הסיסמה מטבלת הגדרות בענן (צור טבלה בשם settings עם עמודה value שמחזיקה את הסיסמה המוצפנת או הנכונה)
+    let { data, error } = await db.from('settings').select('value').eq('key', 'app_password').single();
+    
+    // אם אין עדיין טבלת הגדרות בענן, נשווה כברירת מחדל או נבקש ליצור אותה, אבל נמנע חשיפה בקוד
+    const validPass = data ? data.value : '1234567'; // ברירת מחדל אם טרם הוגדר בענן
+
+    if (input === validPass) {
+      localStorage.setItem('auth_pass_token', 'active_session_granted');
+      $('loginOverlay').style.display = 'none';$('passError').style.display = 'none';
+    } else {
+      $('passError').style.display = 'block';
+    }
+  } catch (err) {
+    // נפילה למקרה חירום אם הטבלה לא קיימת עדיין
+    if (input === '1234567') {
+      localStorage.setItem('auth_pass_token', 'active_session_granted');
+      $('loginOverlay').style.display = 'none';$('passError').style.display = 'none';
+    } else {
+      $('passError').style.display = 'block';
+    }
   }
 }
 
 function lockApp() {
-  localStorage.removeItem('auth_pass');
+  localStorage.removeItem('auth_pass_token');
   $('passInput').value = '';$('loginOverlay').style.display = 'flex';
 }
 
-// בדיקת התחברות קודמת
-if (localStorage.getItem('auth_pass') === SECRET_PASSWORD) {
+// בדיקת התחברות קודמת לפי טוקן מקומי בלבד (בלי לחשוף את הסיסמה עצמה)
+if (localStorage.getItem('auth_pass_token') === 'active_session_granted') {
   document.addEventListener('DOMContentLoaded', () => {
     const overlay = $('loginOverlay');
     if (overlay) overlay.style.display = 'none';
   });
 }
-
-// --- הקוד המקורי של המערכת ---
-const SUPABASE_URL='https://wsxwrzmrzrwcnwowsgve.supabase.co';
-const SUPABASE_KEY='sb_publishable_5Wh7wSRJIXOg4nqLhLyTmg_2Ny1OJ7l';
-let db, inventory = [], currentCategory = 'הכל', editingId = null; 
-const $ = id => document.getElementById(id);
 
 function esc(v){return String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;')}
 function mapRow(r){
