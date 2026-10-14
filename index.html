@@ -10,14 +10,15 @@
 </style></head>
 <body>
 
-<!-- מסך נעילה בסיסמה -->
+<!-- מסך נעילה בסיסמה/אימייל מאובטח מול Supabase Auth -->
 <div id="loginOverlay" style="position:fixed; inset:0; background:#0f172af0; display:flex; align-items:center; justify-content:center; z-index:9999;">
   <div class="card" style="max-width:360px; width:90%; text-align:center; margin:0;">
     <div class="section-title">🔐 כניסה למערכת</div>
-    <form onsubmit="handlePassSubmit(event)" style="display:flex; flex-direction:column; gap:12px;">
-      <input type="password" id="passInput" placeholder="הכנס סיסמה..." style="text-align:center;" required autofocus>
-      <button type="submit" class="primary-btn">התחבר</button>
-      <p id="passError" style="color:#f87171; margin:0; display:none; font-size:0.85rem;">סיסמה שגויה!</p>
+    <form onsubmit="handleLoginSubmit(event)" style="display:flex; flex-direction:column; gap:12px;">
+      <input type="email" id="emailInput" placeholder="אימייל..." style="text-align:center;" required autofocus>
+      <input type="password" id="passInput" placeholder="סיסמה..." style="text-align:center;" required autocomplete="current-password">
+      <button type="submit" class="primary-btn" id="loginBtn">התחבר</button>
+      <p id="passError" style="color:#f87171; margin:0; display:none; font-size:0.85rem;">אימייל או סיסמה שגויים!</p>
     </form>
   </div>
 </div>
@@ -61,7 +62,7 @@
     <div class="chips">
       <button type="button" class="chip active" onclick="setCategory('הכל',this)">הכל</button>
       <button type="button" class="chip" onclick="setCategory('ציוד משרדי',this)">ציוד משרדי</button>
-      <button type="button" class="chip" onclick="setCategory('נייר ודפוס',this)">נייר ודפוס</button>
+      <button type="button" class="chip" onclick="setCategory('נייר ודפוס',this)">נייר ודפוס</option>
       <button type="button" class="chip" onclick="setCategory('אחזקה וניקיון',this)">אחזקה וניקיון</option>
       <button type="button" class="chip" onclick="setCategory('אחר',this)">אחר</option>
     </div>
@@ -78,42 +79,40 @@ const SUPABASE_KEY='sb_publishable_5Wh7wSRJIXOg4nqLhLyTmg_2Ny1OJ7l';
 let db, inventory = [], currentCategory = 'הכל', editingId = null; 
 const $ = id => document.getElementById(id);
 
-// בדיקה אם המשתמש כבר מחובר בזיכרון המקומי
-function checkSavedSession() {
-  if (localStorage.getItem('inv_user_session') === 'authenticated') {
+// בדיקת סשן מאובטחת אוטומטית מול Supabase Auth
+async function checkSavedSession() {
+  const { data: { session } } = await db.auth.getSession();
+  if (session) {
     $('loginOverlay').style.display = 'none';
+    await loadInventory();
   } else {
     $('loginOverlay').style.display = 'flex';
   }
 }
 
-// אימות סיסמה מול Supabase עם fallback ל-1234567
-async function handlePassSubmit(e) {
+// התחברות מאובטחת מול Supabase
+async function handleLoginSubmit(e) {
   if (e) e.preventDefault();
-  const inputPass = ($('passInput').value || '').trim();
-  let targetPassword = '1234567';
+  const email = ($('emailInput').value || '').trim();
+  const password = ($('passInput').value || '').trim();
+  $('passError').style.display = 'none';$('loginBtn').textContent = 'מתחבר...';
 
-  try {
-    let { data, error } = await db.from('settings').select('value').eq('key', 'app_password').single();
-    if (data && data.value) {
-      targetPassword = data.value;
-    }
-  } catch (err) {
-    console.warn('לא נמצאה סיסמה מוגדרת ב-Supabase, משתמש בסיסמת ברירת מחדל.');
-  }
+  const { data, error } = await db.auth.signInWithPassword({ email, password });
 
-  if (inputPass === targetPassword) {
-    localStorage.setItem('inv_user_session', 'authenticated');
-    $('loginOverlay').style.display = 'none';$('passError').style.display = 'none';
+  if (error) {
+    $('passError').textContent = 'אימייל או סיסמה שגויים!';
+    $('passError').style.display = 'block';$('loginBtn').textContent = 'התחבר';
   } else {
-    $('passError').style.display = 'block';
+    $('loginOverlay').style.display = 'none';$('loginBtn').textContent = 'התחבר';
+    await loadInventory();
   }
 }
 
-function lockApp() {
-  localStorage.removeItem('inv_user_session');
+// התנתקות מאובטחת
+async function lockApp() {
+  await db.auth.signOut();
   if ($('passInput'))$('passInput').value = '';
-  if ($('loginOverlay'))$('loginOverlay').style.display = 'flex';
+  if ($('emailInput')) $('emailInput').value = '';$('loginOverlay').style.display = 'flex';
 }
 
 function esc(v){return String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;')}
@@ -320,10 +319,9 @@ $('searchBox').addEventListener('input', render);$('addForm').addEventListener('
 
 async function initApp(){
   try {
-    checkSavedSession();
     if(!window.supabase) throw new Error('ספריית Supabase לא נטענה');
     db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    await loadInventory();
+    await checkSavedSession();
   } catch(e) {
     console.error(e);
     $('dbStatus').textContent='🔴 '+e.message;
