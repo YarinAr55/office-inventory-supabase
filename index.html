@@ -10,15 +10,15 @@
 </style></head>
 <body>
 
-<!-- מסך נעילה בסיסמה בלבד -->
+<!-- מסך נעילה בסיסמה -->
 <div id="loginOverlay" style="position:fixed; inset:0; background:#0f172af0; display:flex; align-items:center; justify-content:center; z-index:9999;">
   <div class="card" style="max-width:360px; width:90%; text-align:center; margin:0;">
     <div class="section-title">🔐 כניסה למערכת</div>
-    <div style="display:flex; flex-direction:column; gap:12px;">
-      <input type="password" id="passInput" placeholder="הכנס סיסמה..." style="text-align:center;" oninput="handlePassInput()" autofocus>
-      <button type="button" class="primary-btn" onclick="handlePassInput()">התחבר</button>
+    <form onsubmit="handlePassSubmit(event)" style="display:flex; flex-direction:column; gap:12px;">
+      <input type="password" id="passInput" placeholder="הכנס סיסמה..." style="text-align:center;" required autofocus>
+      <button type="submit" class="primary-btn">התחבר</button>
       <p id="passError" style="color:#f87171; margin:0; display:none; font-size:0.85rem;">סיסמה שגויה!</p>
-    </div>
+    </form>
   </div>
 </div>
 
@@ -78,19 +78,40 @@ const SUPABASE_KEY='sb_publishable_5Wh7wSRJIXOg4nqLhLyTmg_2Ny1OJ7l';
 let db, inventory = [], currentCategory = 'הכל', editingId = null; 
 const $ = id => document.getElementById(id);
 
-// בדיקת סיסמה מיידית תוך כדי הקלדה
-function handlePassInput() {
-  const val = ($('passInput').value || '').trim();
-  if (val === '1234567') {
-    $('loginOverlay').style.display = 'none';$('passError').style.display = 'none';
-  } else if (val.length >= 7) {
-    $('passError').style.display = 'block';
+// בדיקה אם המשתמש כבר מחובר בזיכרון המקומי
+function checkSavedSession() {
+  if (localStorage.getItem('inv_user_session') === 'authenticated') {
+    $('loginOverlay').style.display = 'none';
   } else {
-    $('passError').style.display = 'none';
+    $('loginOverlay').style.display = 'flex';
+  }
+}
+
+// אימות סיסמה מול Supabase עם fallback ל-1234567
+async function handlePassSubmit(e) {
+  if (e) e.preventDefault();
+  const inputPass = ($('passInput').value || '').trim();
+  let targetPassword = '1234567';
+
+  try {
+    let { data, error } = await db.from('settings').select('value').eq('key', 'app_password').single();
+    if (data && data.value) {
+      targetPassword = data.value;
+    }
+  } catch (err) {
+    console.warn('לא נמצאה סיסמה מוגדרת ב-Supabase, משתמש בסיסמת ברירת מחדל.');
+  }
+
+  if (inputPass === targetPassword) {
+    localStorage.setItem('inv_user_session', 'authenticated');
+    $('loginOverlay').style.display = 'none';$('passError').style.display = 'none';
+  } else {
+    $('passError').style.display = 'block';
   }
 }
 
 function lockApp() {
+  localStorage.removeItem('inv_user_session');
   if ($('passInput'))$('passInput').value = '';
   if ($('loginOverlay'))$('loginOverlay').style.display = 'flex';
 }
@@ -299,6 +320,7 @@ $('searchBox').addEventListener('input', render);$('addForm').addEventListener('
 
 async function initApp(){
   try {
+    checkSavedSession();
     if(!window.supabase) throw new Error('ספריית Supabase לא נטענה');
     db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     await loadInventory();
