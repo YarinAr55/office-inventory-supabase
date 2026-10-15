@@ -4,21 +4,418 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>מערכת ניהול מלאי חכמה</title>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
-*{box-sizing:border-box} body{margin:0;padding:0 0 50px;background:radial-gradient(circle at top,#1e1b4b,#0f172a 60%);color:#f8fafc;font-family:'Inter','Segoe UI',Tahoma,Arial,sans-serif;min-height:100vh} header{background:linear-gradient(135deg,rgba(30,27,75,.9),rgba(49,46,129,.9));padding:20px 40px;position:sticky;top:0;z-index:100;box-shadow:0 10px 30px #0005}.header-content{max-width:1200px;margin:auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}h1{font-size:1.5rem;margin:0 0 4px}p{color:#c7d2fe;font-size:.85rem;margin:2px 0}.container{max-width:1200px;margin:20px auto;padding:0 20px}.card{background:#1e293be6;border-radius:16px;padding:24px;margin-bottom:25px;border:2px solid #6366f166;box-shadow:0 10px 25px #0006}.section-title{font-size:1.2rem;font-weight:700;margin-bottom:16px}.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;align-items:end}.input-group{display:flex;flex-direction:column;gap:6px}label{font-size:.8rem;color:#cbd5e1;font-weight:700}input,select{padding:12px;border-radius:8px;border:1px solid #6366f180;font-size:.95rem;background:#0f172ae6;color:#fff;width:100%}button{cursor:pointer}.primary-btn{background:#6366f1;color:#fff;border:0;border-radius:8px;padding:12px;font-weight:700;width:100%}.export-btn{background:#059669;color:#fff;border:0;border-radius:8px;padding:10px 16px}.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:20px}.stat-card{background:#1e293bb3;border-radius:14px;padding:18px;border:1px solid #334155;display:flex;align-items:center;gap:14px}.stat-card.clickable{cursor:pointer}.stat-icon{width:42px;height:42px;border-radius:10px;background:#6366f126;display:flex;align-items:center;justify-content:center;font-size:1.2rem}.stat-label{font-size:.8rem;color:#94a3b8;font-weight:600}.stat-value{font-size:1.4rem;font-weight:800}.filter-bar{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap}.search-box{flex:2}.chips{display:flex;gap:6px;flex:3;flex-wrap:wrap}.chip{padding:8px 14px;border-radius:20px;background:#1e293b;color:#94a3b8;border:1px solid #334155}.chip.active{background:#6366f1;color:#fff}.grid-container{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}.item-card{background:#1e293bd9;border-radius:14px;padding:16px;border:1px solid #334155;display:flex;flex-direction:column;gap:12px}.item-header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid #334155;padding-bottom:10px}.badge{background:#312e8199;color:#c7d2fe;padding:3px 8px;border-radius:4px;font-size:.75rem}.badge-warehouse{background:#0284c799;color:#e0f2fe;padding:3px 8px;border-radius:4px;font-size:.75rem}.ok-badge,.alert-badge{padding:3px 6px;border-radius:4px;font-size:.7rem;font-weight:700}.ok-badge{background:#064e3b99;color:#34d399}.alert-badge{background:#7f1d1d99;color:#fca5a5}.item-row{display:flex;justify-content:space-between;align-items:center;font-size:.85rem;color:#94a3b8;gap:8px}.table-input{padding:6px;text-align:center;font-size:.85rem}.action-row{background:#0f172a80;padding:8px;border-radius:8px}.action-inputs,.action-buttons{display:flex;gap:6px;margin-top:6px}.plus-btn,.minus-btn,.edit-btn,.delete-btn{border-radius:6px;padding:7px 9px;font-weight:600}.plus-btn{background:#10b981;color:#fff;border:0}.minus-btn{background:#ef4444;color:#fff;border:0}.edit-btn{background:#3730a3;color:#c7d2fe;border:1px solid #6366f1}.delete-btn{background:#7f1d1d;color:#fecaca;border:1px solid #ef444466}.history-box{background:#0f172ab3;border-radius:8px;padding:8px;font-size:.75rem;color:#cbd5e1;display:flex;justify-content:space-between}.edit-form-box{background:#0f172ae6;border:1px solid #6366f1;border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px}.modal-overlay{position:fixed;inset:0;background:#0f172acc;display:none;align-items:center;justify-content:center;z-index:1000}.modal-overlay.active{display:flex}.modal-content{background:#1e293b;border:1px solid #6366f166;border-radius:16px;width:90%;max-width:550px;max-height:80vh;overflow:auto;padding:18px}.modal-item{background:#0f172a99;border:1px solid #ef444466;border-radius:8px;padding:12px;margin-top:8px;display:flex;justify-content:space-between;gap:10px}.empty{grid-column:1/-1;text-align:center;color:#64748b;padding:30px}@media(max-width:650px){header{padding:15px}.container{padding:0 10px}.form{grid-template-columns:1fr}.grid-container{grid-template-columns:1fr}}
-</style></head>
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  padding:0 0 50px;
+  background:radial-gradient(circle at top,#1e1b4b,#0f172a 60%);
+  color:#f8fafc;
+  font-family:'Inter','Segoe UI',Tahoma,Arial,sans-serif;
+  min-height:100vh
+}
+
+header{
+  background:linear-gradient(135deg,rgba(30,27,75,.9),rgba(49,46,129,.9));
+  padding:20px 40px;
+  position:sticky;
+  top:0;
+  z-index:100;
+  box-shadow:0 10px 30px #0005
+}
+
+.header-content{
+  max-width:1200px;
+  margin:auto;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:16px
+}
+
+h1{
+  font-size:1.5rem;
+  margin:0 0 4px
+}
+
+p{
+  color:#c7d2fe;
+  font-size:.85rem;
+  margin:2px 0
+}
+
+.container{
+  max-width:1200px;
+  margin:20px auto;
+  padding:0 20px
+}
+
+.card{
+  background:#1e293be6;
+  border-radius:16px;
+  padding:24px;
+  margin-bottom:25px;
+  border:2px solid #6366f166;
+  box-shadow:0 10px 25px #0006
+}
+
+.section-title{
+  font-size:1.2rem;
+  font-weight:700;
+  margin-bottom:16px
+}
+
+.form{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:14px;
+  align-items:end
+}
+
+.input-group{
+  display:flex;
+  flex-direction:column;
+  gap:6px
+}
+
+label{
+  font-size:.8rem;
+  color:#cbd5e1;
+  font-weight:700
+}
+
+input,select{
+  padding:12px;
+  border-radius:8px;
+  border:1px solid #6366f180;
+  font-size:.95rem;
+  background:#0f172ae6;
+  color:#fff;
+  width:100%
+}
+
+button{
+  cursor:pointer
+}
+
+button:disabled{
+  cursor:not-allowed;
+  opacity:.7
+}
+
+.primary-btn{
+  background:#6366f1;
+  color:#fff;
+  border:0;
+  border-radius:8px;
+  padding:12px;
+  font-weight:700;
+  width:100%
+}
+
+.export-btn{
+  background:#059669;
+  color:#fff;
+  border:0;
+  border-radius:8px;
+  padding:10px 16px
+}
+
+.stats-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:16px;
+  margin-bottom:20px
+}
+
+.stat-card{
+  background:#1e293bb3;
+  border-radius:14px;
+  padding:18px;
+  border:1px solid #334155;
+  display:flex;
+  align-items:center;
+  gap:14px
+}
+
+.stat-card.clickable{
+  cursor:pointer
+}
+
+.stat-icon{
+  width:42px;
+  height:42px;
+  border-radius:10px;
+  background:#6366f126;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:1.2rem
+}
+
+.stat-label{
+  font-size:.8rem;
+  color:#94a3b8;
+  font-weight:600
+}
+
+.stat-value{
+  font-size:1.4rem;
+  font-weight:800
+}
+
+.filter-bar{
+  display:flex;
+  gap:12px;
+  margin-bottom:20px;
+  flex-wrap:wrap
+}
+
+.search-box{
+  flex:2
+}
+
+.chips{
+  display:flex;
+  gap:6px;
+  flex:3;
+  flex-wrap:wrap
+}
+
+.chip{
+  padding:8px 14px;
+  border-radius:20px;
+  background:#1e293b;
+  color:#94a3b8;
+  border:1px solid #334155
+}
+
+.chip.active{
+  background:#6366f1;
+  color:#fff
+}
+
+.grid-container{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+  gap:16px
+}
+
+.item-card{
+  background:#1e293bd9;
+  border-radius:14px;
+  padding:16px;
+  border:1px solid #334155;
+  display:flex;
+  flex-direction:column;
+  gap:12px
+}
+
+.item-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  border-bottom:1px solid #334155;
+  padding-bottom:10px
+}
+
+.badge{
+  background:#312e8199;
+  color:#c7d2fe;
+  padding:3px 8px;
+  border-radius:4px;
+  font-size:.75rem
+}
+
+.badge-warehouse{
+  background:#0284c799;
+  color:#e0f2fe;
+  padding:3px 8px;
+  border-radius:4px;
+  font-size:.75rem
+}
+
+.ok-badge,.alert-badge{
+  padding:3px 6px;
+  border-radius:4px;
+  font-size:.7rem;
+  font-weight:700
+}
+
+.ok-badge{
+  background:#064e3b99;
+  color:#34d399
+}
+
+.alert-badge{
+  background:#7f1d1d99;
+  color:#fca5a5
+}
+
+.item-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-size:.85rem;
+  color:#94a3b8;
+  gap:8px
+}
+
+.table-input{
+  padding:6px;
+  text-align:center;
+  font-size:.85rem
+}
+
+.action-row{
+  background:#0f172a80;
+  padding:8px;
+  border-radius:8px
+}
+
+.action-inputs,.action-buttons{
+  display:flex;
+  gap:6px;
+  margin-top:6px
+}
+
+.plus-btn,.minus-btn,.edit-btn,.delete-btn{
+  border-radius:6px;
+  padding:7px 9px;
+  font-weight:600
+}
+
+.plus-btn{
+  background:#10b981;
+  color:#fff;
+  border:0
+}
+
+.minus-btn{
+  background:#ef4444;
+  color:#fff;
+  border:0
+}
+
+.edit-btn{
+  background:#3730a3;
+  color:#c7d2fe;
+  border:1px solid #6366f1
+}
+
+.delete-btn{
+  background:#7f1d1d;
+  color:#fecaca;
+  border:1px solid #ef444466
+}
+
+.history-box{
+  background:#0f172ab3;
+  border-radius:8px;
+  padding:8px;
+  font-size:.75rem;
+  color:#cbd5e1;
+  display:flex;
+  justify-content:space-between
+}
+
+.edit-form-box{
+  background:#0f172ae6;
+  border:1px solid #6366f1;
+  border-radius:10px;
+  padding:12px;
+  display:flex;
+  flex-direction:column;
+  gap:8px
+}
+
+.modal-overlay{
+  position:fixed;
+  inset:0;
+  background:#0f172acc;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:1000
+}
+
+.modal-overlay.active{
+  display:flex
+}
+
+.modal-content{
+  background:#1e293b;
+  border:1px solid #6366f166;
+  border-radius:16px;
+  width:90%;
+  max-width:550px;
+  max-height:80vh;
+  overflow:auto;
+  padding:18px
+}
+
+.modal-item{
+  background:#0f172a99;
+  border:1px solid #ef444466;
+  border-radius:8px;
+  padding:12px;
+  margin-top:8px;
+  display:flex;
+  justify-content:space-between;
+  gap:10px
+}
+
+.empty{
+  grid-column:1/-1;
+  text-align:center;
+  color:#64748b;
+  padding:30px
+}
+
+@media(max-width:650px){
+  header{padding:15px}
+  .container{padding:0 10px}
+  .form{grid-template-columns:1fr}
+  .grid-container{grid-template-columns:1fr}
+  .action-inputs,.action-buttons{flex-direction:column}
+}
+</style>
+</head>
+
 <body>
 
-<!-- מסך נעילה בסיסמה/אימייל מאובטח מול Supabase Auth -->
-<div id="loginOverlay" style="position:fixed; inset:0; background:#0f172af0; display:flex; align-items:center; justify-content:center; z-index:9999;">
-  <div class="card" style="max-width:360px; width:90%; text-align:center; margin:0;">
+<!-- מסך כניסה באמצעות סיסמה בלבד -->
+<div id="loginOverlay" style="position:fixed;inset:0;background:#0f172af0;display:flex;align-items:center;justify-content:center;z-index:9999;">
+  <div class="card" style="max-width:360px;width:90%;text-align:center;margin:0;">
     <div class="section-title">🔐 כניסה למערכת</div>
-    <form onsubmit="handleLoginSubmit(event)" style="display:flex; flex-direction:column; gap:12px;">
-      <input type="email" id="emailInput" placeholder="אימייל..." style="text-align:center;" required autofocus>
-      <input type="password" id="passInput" placeholder="סיסמה..." style="text-align:center;" required autocomplete="current-password">
-      <button type="submit" class="primary-btn" id="loginBtn">התחבר</button>
-      <p id="passError" style="color:#f87171; margin:0; display:none; font-size:0.85rem;">אימייל או סיסמה שגויים!</p>
+
+    <p style="margin-bottom:16px;">
+      יש להזין את סיסמת המערכת
+    </p>
+
+    <form onsubmit="handleLoginSubmit(event)" style="display:flex;flex-direction:column;gap:12px;">
+      <input
+        type="password"
+        id="passInput"
+        placeholder="סיסמה..."
+        style="text-align:center;"
+        required
+        autofocus
+        autocomplete="current-password"
+      >
+
+      <button type="submit" class="primary-btn" id="loginBtn">
+        כניסה
+      </button>
+
+      <p id="passError" style="color:#f87171;margin:0;display:none;font-size:.85rem;">
+        הסיסמה שגויה
+      </p>
     </form>
   </div>
 </div>
@@ -28,313 +425,1161 @@
     <div>
       <h1>📦 ניהול מלאי חכם</h1>
       <p>מערכת מלאי משותפת בענן</p>
-      <p id="dbStatus">🟡 מתחבר ל-Supabase...</p>
+      <p id="dbStatus">🔒 המערכת נעולה</p>
     </div>
-    <div style="display:flex; gap:10px; align-items:center;">
-      <button type="button" class="export-btn" onclick="exportToExcel()">📥 ייצוא לאקסל</button>
-      <button type="button" class="delete-btn" onclick="lockApp()">🔒 נעילה</button>
+
+    <div style="display:flex;gap:10px;align-items:center;">
+      <button type="button" class="export-btn" onclick="exportToExcel()">
+        📥 ייצוא לאקסל
+      </button>
+
+      <button type="button" class="delete-btn" onclick="lockApp()">
+        🔒 נעילה
+      </button>
     </div>
   </div>
 </header>
 
 <div class="container">
+
   <div class="card">
     <div class="section-title">➕ הוספת פריט חדש למלאי</div>
+
     <form id="addForm" class="form">
-      <div class="input-group"><label>שם הפריט</label><input id="newName" required placeholder="למשל: דפים A4"></div>
-      <div class="input-group"><label>קטגוריה</label><select id="newCategory"><option>ציוד משרדי</option><option>נייר ודפוס</option><option>אחזקה וניקיון</option><option>אחר</option></select></div>
-      <div class="input-group"><label>מחסן / מיקום</label><input id="newWarehouse" placeholder="למשל: מחסן מרכזי, מדף ב'..."></div>
-      <div class="input-group"><label>כמות התחלתית</label><input type="number" id="newQuantity" value="0" min="0" required></div>
-      <div class="input-group"><label>מינימום התראה</label><input type="number" id="newMin" value="5" min="0"></div>
-      <div class="input-group"><label>מחיר יחידה (₪)</label><input type="number" id="newPrice" value="0" step="any" min="0"></div>
-      <div><button id="addBtn" class="primary-btn" type="submit">הוסף פריט</button></div>
+
+      <div class="input-group">
+        <label>שם הפריט</label>
+        <input id="newName" required placeholder="למשל: דפים A4">
+      </div>
+
+      <div class="input-group">
+        <label>קטגוריה</label>
+        <select id="newCategory">
+          <option>ציוד משרדי</option>
+          <option>נייר ודפוס</option>
+          <option>אחזקה וניקיון</option>
+          <option>אחר</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label>מחסן / מיקום</label>
+        <input id="newWarehouse" placeholder="למשל: מחסן מרכזי, מדף ב'...">
+      </div>
+
+      <div class="input-group">
+        <label>כמות התחלתית</label>
+        <input type="number" id="newQuantity" value="0" min="0" required>
+      </div>
+
+      <div class="input-group">
+        <label>מינימום התראה</label>
+        <input type="number" id="newMin" value="5" min="0">
+      </div>
+
+      <div class="input-group">
+        <label>מחיר יחידה (₪)</label>
+        <input type="number" id="newPrice" value="0" step="any" min="0">
+      </div>
+
+      <div>
+        <button id="addBtn" class="primary-btn" type="submit">
+          הוסף פריט
+        </button>
+      </div>
+
     </form>
   </div>
 
   <div class="stats-grid">
-    <div class="stat-card"><div class="stat-icon">🏷️</div><div><span class="stat-label">סה"כ סוגי פריטים</span><div class="stat-value" id="totalTypesCount">0</div></div></div>
-    <div class="stat-card"><div class="stat-icon">📦</div><div><span class="stat-label">סה"כ יחידות במלאי</span><div class="stat-value" id="totalCount">0</div></div></div>
-    <div class="stat-card clickable" onclick="openLowStockModal()"><div class="stat-icon">⚠️</div><div><span class="stat-label">פריטים במלאי נמוך</span><div class="stat-value" id="lowCount">0</div></div></div>
-    <div class="stat-card"><div class="stat-icon">💰</div><div><span class="stat-label">שווי כולל של המלאי</span><div class="stat-value" id="totalValue">₪0</div></div></div>
+
+    <div class="stat-card">
+      <div class="stat-icon">🏷️</div>
+      <div>
+        <span class="stat-label">סה"כ סוגי פריטים</span>
+        <div class="stat-value" id="totalTypesCount">0</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">📦</div>
+      <div>
+        <span class="stat-label">סה"כ יחידות במלאי</span>
+        <div class="stat-value" id="totalCount">0</div>
+      </div>
+    </div>
+
+    <div class="stat-card clickable" onclick="openLowStockModal()">
+      <div class="stat-icon">⚠️</div>
+      <div>
+        <span class="stat-label">פריטים במלאי נמוך</span>
+        <div class="stat-value" id="lowCount">0</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">💰</div>
+      <div>
+        <span class="stat-label">שווי כולל של המלאי</span>
+        <div class="stat-value" id="totalValue">₪0</div>
+      </div>
+    </div>
+
   </div>
 
   <div class="filter-bar">
-    <input class="search-box" id="searchBox" placeholder="🔍 חיפוש פריט מהיר...">
+
+    <input
+      class="search-box"
+      id="searchBox"
+      placeholder="🔍 חיפוש פריט מהיר..."
+    >
+
     <div class="chips">
-      <button type="button" class="chip active" onclick="setCategory('הכל',this)">הכל</button>
-      <button type="button" class="chip" onclick="setCategory('ציוד משרדי',this)">ציוד משרדי</button>
-      <button type="button" class="chip" onclick="setCategory('נייר ודפוס',this)">נייר ודפוס</button>
-      <button type="button" class="chip" onclick="setCategory('אחזקה וניקיון',this)">אחזקה וניקיון</option>
-      <button type="button" class="chip" onclick="setCategory('אחר',this)">אחר</option>
+      <button type="button" class="chip active" onclick="setCategory('הכל',this)">
+        הכל
+      </button>
+
+      <button type="button" class="chip" onclick="setCategory('ציוד משרדי',this)">
+        ציוד משרדי
+      </button>
+
+      <button type="button" class="chip" onclick="setCategory('נייר ודפוס',this)">
+        נייר ודפוס
+      </button>
+
+      <button type="button" class="chip" onclick="setCategory('אחזקה וניקיון',this)">
+        אחזקה וניקיון
+      </button>
+
+      <button type="button" class="chip" onclick="setCategory('אחר',this)">
+        אחר
+      </button>
     </div>
+
   </div>
 
-  <div class="grid-container" id="itemsGrid"><div class="empty">טוען מלאי...</div></div>
+  <div class="grid-container" id="itemsGrid">
+    <div class="empty">הזן סיסמה כדי להציג את המלאי</div>
+  </div>
+
 </div>
 
-<div class="modal-overlay" id="lowStockModal"><div class="modal-content"><div style="display:flex;justify-content:space-between"><strong style="color:#f87171">⚠️ פריטים מתחת למינימום</strong><button class="delete-btn" onclick="closeLowStockModal()">✕</button></div><div id="lowStockModalBody"></div></div></div>
+<div class="modal-overlay" id="lowStockModal">
+  <div class="modal-content">
+
+    <div style="display:flex;justify-content:space-between">
+      <strong style="color:#f87171">
+        ⚠️ פריטים מתחת למינימום
+      </strong>
+
+      <button type="button" class="delete-btn" onclick="closeLowStockModal()">
+        ✕
+      </button>
+    </div>
+
+    <div id="lowStockModalBody"></div>
+
+  </div>
+</div>
 
 <script>
-const SUPABASE_URL='https://wsxwrzmrzrwcnwowsgve.supabase.co';
-const SUPABASE_KEY='sb_publishable_5Wh7wSRJIXOg4nqLhLyTmg_2Ny1OJ7l';
-let db, inventory = [], currentCategory = 'הכל', editingId = null; 
+const SUPABASE_URL = 'https://wsxwrzmrzrwcnwowsgve.supabase.co';
+
+const SUPABASE_KEY =
+  'sb_publishable_5Wh7wSRJIXOg4nqLhLyTmg_2Ny1OJ7l';
+
+const LOGIN_FUNCTION_URL =
+  SUPABASE_URL + '/functions/v1/inventory-login';
+
+let db;
+let inventory = [];
+let currentCategory = 'הכל';
+let editingId = null;
+
 const $ = id => document.getElementById(id);
 
-async function checkSavedSession() {
-  const { data: { session } } = await db.auth.getSession();
-  if (session) {
+
+/* =========================================
+   כניסה באמצעות סיסמה בלבד
+========================================= */
+
+function checkSavedSession() {
+  const loggedIn =
+    sessionStorage.getItem('inventory_logged_in') === 'true';
+
+  if (loggedIn) {
     $('loginOverlay').style.display = 'none';
-    await loadInventory();
+    loadInventory();
   } else {
     $('loginOverlay').style.display = 'flex';
+    $('dbStatus').textContent = '🔒 המערכת נעולה';
+    $('dbStatus').style.color = '#fbbf24';
   }
 }
 
-async function handleLoginSubmit(e) {
-  if (e) e.preventDefault();
-  const email = ($('emailInput').value || '').trim();
+
+async function handleLoginSubmit(event) {
+  event.preventDefault();
+
   const password = ($('passInput').value || '').trim();
-  $('passError').style.display = 'none';$('loginBtn').textContent = 'מתחבר...';
+  const loginBtn = $('loginBtn');
+  const passError = $('passError');
 
-  const { data, error } = await db.auth.signInWithPassword({ email, password });
+  passError.style.display = 'none';
+  passError.textContent = '';
 
-  if (error) {
-    $('passError').textContent = 'אימייל או סיסמה שגויים!';
-    $('passError').style.display = 'block';$('loginBtn').textContent = 'התחבר';
-  } else {
-    $('loginOverlay').style.display = 'none';$('loginBtn').textContent = 'התחבר';
+  if (!password) {
+    passError.textContent = 'יש להזין סיסמה';
+    passError.style.display = 'block';
+    return;
+  }
+
+  loginBtn.disabled = true;
+  loginBtn.textContent = 'בודק סיסמה...';
+
+  try {
+    const response = await fetch(LOGIN_FUNCTION_URL, {
+      method: 'POST',
+
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY
+      },
+
+      body: JSON.stringify({
+        password: password
+      })
+    });
+
+    let result = {};
+
+    try {
+      result = await response.json();
+    } catch (jsonError) {
+      console.error('תשובת הפונקציה אינה JSON:', jsonError);
+    }
+
+    if (!response.ok || result.success !== true) {
+      throw new Error(
+        result.error || 'הסיסמה שגויה'
+      );
+    }
+
+    sessionStorage.setItem(
+      'inventory_logged_in',
+      'true'
+    );
+
+    $('passInput').value = '';
+    $('loginOverlay').style.display = 'none';
+
     await loadInventory();
+
+  } catch (error) {
+    console.error('Login error:', error);
+
+    if (
+      error.message === 'Failed to fetch' ||
+      error.message.includes('NetworkError')
+    ) {
+      passError.textContent =
+        'לא ניתן להתחבר לשרת. בדוק שפונקציית inventory-login פעילה.';
+    } else {
+      passError.textContent = 'הסיסמה שגויה';
+    }
+
+    passError.style.display = 'block';
+
+  } finally {
+    loginBtn.disabled = false;
+    loginBtn.textContent = 'כניסה';
   }
 }
 
-async function lockApp() {
-  await db.auth.signOut();
-  if ($('passInput'))$('passInput').value = '';
-  if ($('emailInput')) $('emailInput').value = '';$('loginOverlay').style.display = 'flex';
+
+function lockApp() {
+  sessionStorage.removeItem('inventory_logged_in');
+
+  inventory = [];
+  editingId = null;
+
+  if ($('passInput')) {
+    $('passInput').value = '';
+  }
+
+  $('itemsGrid').innerHTML =
+    '<div class="empty">הזן סיסמה כדי להציג את המלאי</div>';
+
+  $('totalTypesCount').textContent = '0';
+  $('totalCount').textContent = '0';
+  $('lowCount').textContent = '0';
+  $('totalValue').textContent = '₪0';
+
+  $('dbStatus').textContent = '🔒 המערכת נעולה';
+  $('dbStatus').style.color = '#fbbf24';
+
+  $('loginOverlay').style.display = 'flex';
+
+  setTimeout(() => {
+    $('passInput').focus();
+  }, 100);
 }
 
-function esc(v){return String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;')}
 
-function mapRow(r){
+/* =========================================
+   פונקציות עזר
+========================================= */
+
+function esc(value) {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
+
+function mapRow(row) {
   return {
-    id: Number(r.id),
-    name: r.name || '',
-    category: r.category || 'אחר',
-    warehouse: r.warehouse || 'ראשי',
-    quantity: Number(r.quantity || 0),
-    minStock: Number(r.min_stock ?? r.minStock ?? 0),
-    lastPrice: Number(r.last_price ?? r.lastPrice ?? 0),
-    prevPrice: Number(r.prev_price ?? r.prevPrice ?? 0),
-    totalConsumed: Number(r.total_consumed ?? r.totalConsumed ?? 0),
-    lastDate: r.last_date ?? r.lastDate ?? 'טרם עודכן'
+    id: Number(row.id),
+    name: row.name || '',
+    category: row.category || 'אחר',
+    warehouse: row.warehouse || 'ראשי',
+    quantity: Number(row.quantity || 0),
+    minStock: Number(row.min_stock ?? row.minStock ?? 0),
+    lastPrice: Number(row.last_price ?? row.lastPrice ?? 0),
+    prevPrice: Number(row.prev_price ?? row.prevPrice ?? 0),
+    totalConsumed: Number(
+      row.total_consumed ?? row.totalConsumed ?? 0
+    ),
+    lastDate:
+      row.last_date ??
+      row.lastDate ??
+      'טרם עודכן'
   };
 }
-function now(a){return a+': '+new Date().toLocaleString('he-IL')}
 
-async function loadInventory(){
+
+function now(action) {
+  return action + ': ' +
+    new Date().toLocaleString('he-IL');
+}
+
+
+/* =========================================
+   טעינת המלאי
+========================================= */
+
+async function loadInventory() {
   try {
-    $('dbStatus').textContent='🟡 טוען נתונים מ-Supabase...';
-    let {data, error} = await db.from('inventory').select('*').order('id', {ascending: false});
-    if(error) throw error;
+    $('dbStatus').textContent =
+      '🟡 טוען נתונים מ-Supabase...';
+
+    $('dbStatus').style.color = '#fbbf24';
+
+    const { data, error } = await db
+      .from('inventory')
+      .select('*')
+      .order('id', { ascending: false });
+
+    if (error) {
+      throw error;
+    }
+
     inventory = (data || []).map(mapRow);
-    $('dbStatus').textContent='🟢 מחובר ל-Supabase';
-    $('dbStatus').style.color='#34d399';
+
+    $('dbStatus').textContent =
+      '🟢 מחובר ל-Supabase';
+
+    $('dbStatus').style.color = '#34d399';
+
     render();
-  } catch(e) {
-    console.error(e);
-    $('dbStatus').textContent='🔴 שגיאה: '+e.message;
-    $('dbStatus').style.color='#f87171';
-    $('itemsGrid').innerHTML='<div class="empty">'+esc(e.message)+'</div>';
+
+  } catch (error) {
+    console.error(error);
+
+    $('dbStatus').textContent =
+      '🔴 שגיאה: ' + error.message;
+
+    $('dbStatus').style.color = '#f87171';
+
+    $('itemsGrid').innerHTML =
+      '<div class="empty">' +
+      esc(error.message) +
+      '</div>';
   }
 }
 
-async function addItem(e){
-  e.preventDefault();
+
+/* =========================================
+   הוספת פריט
+========================================= */
+
+async function addItem(event) {
+  event.preventDefault();
+
   const name = $('newName').value.trim();
-  if(!name) return;
+
+  if (!name) {
+    return;
+  }
 
   const itemObj = {
     name: name,
     category: $('newCategory').value,
-    warehouse: $('newWarehouse').value.trim() || 'ראשי',
-    quantity: Number($('newQuantity').value) || 0,
-    min_stock: Number($('newMin').value) || 0,
-    last_price: Number($('newPrice').value) || 0
+    warehouse:
+      $('newWarehouse').value.trim() || 'ראשי',
+    quantity:
+      Number($('newQuantity').value) || 0,
+    min_stock:
+      Number($('newMin').value) || 0,
+    last_price:
+      Number($('newPrice').value) || 0
   };
 
-  let { data, error } = await db.from('inventory').insert([itemObj]);
+  const { error } = await db
+    .from('inventory')
+    .insert([itemObj]);
 
-  if(error) {
-    alert('שגיאה בהוספה ל-Supabase:\n' + error.message);
-    console.error('Supabase Insert Error:', error);
+  if (error) {
+    alert(
+      'שגיאה בהוספה ל-Supabase:\n' +
+      error.message
+    );
+
+    console.error(
+      'Supabase Insert Error:',
+      error
+    );
+
     return;
   }
 
   $('newName').value = '';
-  $('newWarehouse').value = '';$('newQuantity').value = '0';
-  $('newMin').value = '5';$('newPrice').value = '0';
+  $('newWarehouse').value = '';
+  $('newQuantity').value = '0';
+  $('newMin').value = '5';
+  $('newPrice').value = '0';
+
   await loadInventory();
 }
 
-async function deleteItem(id){
-  if(!confirm('האם למחוק את הפריט לצמיתות?')) return;
-  let {error} = await db.from('inventory').delete().eq('id', id);
-  if(error) return alert('שגיאה במחיקה: ' + error.message);
-  await loadInventory();
-}
 
-function toggleEdit(id){
-  editingId = editingId === id ? null : id;
-  render();
-}
+/* =========================================
+   מחיקת פריט
+========================================= */
 
-async function saveEdit(id){
-  let name = $('edit_name_'+id).value.trim();
-  if(!name) return alert('שם הפריט לא יכול להיות ריק');
-  
-  let u = {
-    name: name,
-    category: $('edit_cat_'+id).value,
-    warehouse: $('edit_wh_'+id).value.trim() || 'ראשי',
-    min_stock: Number($('edit_min_'+id).value) || 0
-  };
-
-  let {error} = await db.from('inventory').update(u).eq('id', id);
-  if(error) return alert('שגיאה בשמירה: ' + error.message);
-
-  editingId = null;
-  await loadInventory();
-}
-
-async function updatePrice(id, v){
-  let i = inventory.find(x => x.id === id);
-  if(!i) return;
-  let p = Number(v) || 0;
-  if(p === i.lastPrice) return;
-  let {error} = await db.from('inventory').update({
-    prev_price: i.lastPrice,
-    last_price: p
-  }).eq('id', id);
-  if(error) return alert('שגיאה בעדכון מחיר: ' + error.message);
-  await loadInventory();
-}
-
-async function addStock(id){
-  let i = inventory.find(x => x.id === id), q = Number($('qty_'+id).value) || 0;
-  if(!i || q <= 0) return alert('אנא הזן כמות חיובית');
-  let u = { quantity: i.quantity + q, last_date: now('הוספה') }, pt = $('price_'+id).value;
-  if(pt !== ''){
-    let p = Number(pt);
-    if(Number.isFinite(p) && p >= 0 && p !== i.lastPrice){
-      u.prev_price = i.lastPrice;
-      u.last_price = p;
-    }
-  }
-  let {error} = await db.from('inventory').update(u).eq('id', id);
-  if(error) return alert('שגיאה בהוספת מלאי: ' + error.message);
-  await loadInventory();
-}
-
-async function deductStock(id){
-  let i = inventory.find(x => x.id === id), q = Number($('qty_'+id).value) || 0;
-  if(!i || q <= 0) return alert('אנא הזן כמות חיובית');
-  if(q > i.quantity) return alert('אין מספיק יחידות במלאי');
-  let {error} = await db.from('inventory').update({
-    quantity: i.quantity - q,
-    total_consumed: i.totalConsumed + q,
-    last_date: now('הורדה')
-  }).eq('id', id);
-  if(error) return alert('שגיאה בהורדת מלאי: ' + error.message);
-  await loadInventory();
-}
-
-function setCategory(c, b){
-  currentCategory = c;
-  document.querySelectorAll('.chip').forEach(x => x.classList.remove('active'));
-  b.classList.add('active');
-  render();
-}
-
-function openLowStockModal(){
-  let a = inventory.filter(i => i.quantity <= i.minStock);
-  $('lowStockModalBody').innerHTML = a.length ? a.map(i => `<div class="modal-item"><div><strong>${esc(i.name)}</strong><div style="font-size:.75rem;color:#94a3b8">${esc(i.category)} | מחסן: ${esc(i.warehouse)} | מינימום: ${i.minStock}</div></div><strong style="color:#f87171">כמות: ${i.quantity}</strong></div>`).join('') : '<div class="empty" style="color:#34d399">אין פריטים בחריגה</div>';
-  $('lowStockModal').classList.add('active');
-}
-
-function closeLowStockModal(){
-  $('lowStockModal').classList.remove('active');
-}
-
-function render(){
-  let s = $('searchBox').value.trim().toLowerCase();
-  let a = inventory.filter(i => (i.name.toLowerCase().includes(s) || i.warehouse.toLowerCase().includes(s)) && (currentCategory === 'הכל' || i.category === currentCategory));
-  
-  $('totalTypesCount').textContent = inventory.length;
-  $('totalCount').textContent = inventory.reduce((n, i) => n + i.quantity, 0);
-  let lc = inventory.filter(i => i.quantity <= i.minStock).length;
-  $('lowCount').textContent = lc;
-  $('lowCount').style.color = lc ? '#f87171' : '#34d399';
-  $('totalValue').textContent = '₪' + inventory.reduce((n, i) => n + i.quantity * i.lastPrice, 0).toLocaleString('he-IL', {maximumFractionDigits: 2});
-
-  if(!a.length){
-    $('itemsGrid').innerHTML = '<div class="empty">אין פריטים להצגה כרגע. הוסף פריט חדש למעלה!</div>';
+async function deleteItem(id) {
+  if (!confirm('האם למחוק את הפריט לצמיתות?')) {
     return;
   }
 
-  $('itemsGrid').innerHTML = a.map(i => editingId === i.id ? `
-    <div class="item-card">
-      <div class="edit-form-box">
-        <strong>✏️ עריכת פריט</strong>
-        <label>שם</label><input id="edit_name_${i.id}" value="${esc(i.name)}">
-        <label>קטגוריה</label><select id="edit_cat_${i.id}"><option ${i.category==='ציוד משרדי'?'selected':''}>ציוד משרדי</option><option ${i.category==='נייר ודפוס'?'selected':''}>נייר ודפוס</option><option ${i.category==='אחזקה וניקיון'?'selected':''}>אחזקה וניקיון</option><option ${i.category==='אחר'?'selected':''}>אחר</option></select>
-        <label>מחסן / מיקום</label><input id="edit_wh_${i.id}" value="${esc(i.warehouse)}">
-        <label>מינימום</label><input type="number" id="edit_min_${i.id}" value="${i.minStock}">
-        <div><button class="plus-btn" onclick="saveEdit(${i.id})">שמור</button> <button class="delete-btn" onclick="toggleEdit(${i.id})">ביטול</button></div>
-      </div>
-    </div>` : `
-    <div class="item-card" id="card_${i.id}">
-      <div class="item-header">
-        <div><strong style="font-size:1.1rem">${esc(i.name)}</strong><br><span class="badge">${esc(i.category)}</span> <span class="badge-warehouse">🏭 ${esc(i.warehouse)}</span></div>
-        <div><button class="edit-btn" onclick="toggleEdit(${i.id})">✏️ עריכה</button> <span class="${i.quantity<=i.minStock?'alert-badge':'ok-badge'}">${i.quantity<=i.minStock?'⚠️ נמוך':'✓ תקין'}</span></div>
-      </div>
-      <div class="item-row"><span>כמות במלאי:</span><strong>${i.quantity}</strong></div>
-      <div class="action-row">
-        <div class="action-inputs"><input type="number" id="qty_${i.id}" placeholder="כמות" min="1"><input type="number" id="price_${i.id}" placeholder="מחיר ₪" step="any" min="0"></div>
-        <div class="action-buttons"><button class="plus-btn" onclick="addStock(${i.id})">+ הוסף סחורה</button><button class="minus-btn" onclick="deductStock(${i.id})">- הורד מהמלאי</button></div>
-      </div>
-      <div class="item-row"><span>מחיר יחידה נוכחי (₪):</span><input class="table-input" type="number" step="any" value="${i.lastPrice}" onchange="updatePrice(${i.id},this.value)"></div>
-      <div class="history-box"><span>🏷️ מחיר קודם:</span><strong style="color:#fbbf24">${i.prevPrice>0?'₪'+i.prevPrice:'אין מחיר קודם'}</strong></div>
-      <div class="history-box"><span>📊 סה"כ שחרורים:</span><strong>${i.totalConsumed}</strong></div>
-      <div class="history-box"><span>🕒 פעילות אחרונה:</span><strong>${esc(i.lastDate)}</strong></div>
-      <div class="item-row"><span>מינימום: ${i.minStock}</span><button class="delete-btn" onclick="deleteItem(${i.id})">מחק פריט</button></div>
-    </div>`).join('');
+  const { error } = await db
+    .from('inventory')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    alert(
+      'שגיאה במחיקה: ' +
+      error.message
+    );
+
+    return;
+  }
+
+  await loadInventory();
 }
 
-function exportToExcel(){
-  if(!inventory.length) return alert('אין פריטים לייצוא');
-  let sortedInventory = [...inventory].sort((a, b) => a.warehouse.localeCompare(b.warehouse, 'he'));
-  let c = '﻿מחסן,שם פריט,קטגוריה,כמות נוכחית,מינימום,מחיר נוכחי,מחיר קודם,סך הכל שחרורים,פעילות אחרונה\n';
-  sortedInventory.forEach(i => c += `"${i.warehouse.replaceAll('"','""')}","${i.name.replaceAll('"','""')}","${i.category.replaceAll('"','""')}",${i.quantity},${i.minStock},${i.lastPrice},${i.prevPrice},${i.totalConsumed},"${String(i.lastDate).replaceAll('"','""')}"\n`);
-  let b = new Blob([c], {type:'text/csv;charset=utf-8;'}), u = URL.createObjectURL(b), a = document.createElement('a');
-  a.href = u; a.download = 'inventory_report_by_warehouse.csv'; a.click(); URL.revokeObjectURL(u);
+
+/* =========================================
+   עריכת פריט
+========================================= */
+
+function toggleEdit(id) {
+  editingId =
+    editingId === id ? null : id;
+
+  render();
 }
 
-$('searchBox').addEventListener('input', render);$('addForm').addEventListener('submit', addItem);
 
-async function initApp(){
+async function saveEdit(id) {
+  const name =
+    $('edit_name_' + id).value.trim();
+
+  if (!name) {
+    alert('שם הפריט לא יכול להיות ריק');
+    return;
+  }
+
+  const updatedItem = {
+    name: name,
+    category:
+      $('edit_cat_' + id).value,
+    warehouse:
+      $('edit_wh_' + id).value.trim() ||
+      'ראשי',
+    min_stock:
+      Number(
+        $('edit_min_' + id).value
+      ) || 0
+  };
+
+  const { error } = await db
+    .from('inventory')
+    .update(updatedItem)
+    .eq('id', id);
+
+  if (error) {
+    alert(
+      'שגיאה בשמירה: ' +
+      error.message
+    );
+
+    return;
+  }
+
+  editingId = null;
+
+  await loadInventory();
+}
+
+
+/* =========================================
+   עדכון מחיר
+========================================= */
+
+async function updatePrice(id, value) {
+  const item =
+    inventory.find(x => x.id === id);
+
+  if (!item) {
+    return;
+  }
+
+  const price = Number(value) || 0;
+
+  if (price === item.lastPrice) {
+    return;
+  }
+
+  const { error } = await db
+    .from('inventory')
+    .update({
+      prev_price: item.lastPrice,
+      last_price: price
+    })
+    .eq('id', id);
+
+  if (error) {
+    alert(
+      'שגיאה בעדכון מחיר: ' +
+      error.message
+    );
+
+    return;
+  }
+
+  await loadInventory();
+}
+
+
+/* =========================================
+   הוספת מלאי
+========================================= */
+
+async function addStock(id) {
+  const item =
+    inventory.find(x => x.id === id);
+
+  const quantity =
+    Number($('qty_' + id).value) || 0;
+
+  if (!item || quantity <= 0) {
+    alert('אנא הזן כמות חיובית');
+    return;
+  }
+
+  const updateObject = {
+    quantity:
+      item.quantity + quantity,
+    last_date:
+      now('הוספה')
+  };
+
+  const priceText =
+    $('price_' + id).value;
+
+  if (priceText !== '') {
+    const price = Number(priceText);
+
+    if (
+      Number.isFinite(price) &&
+      price >= 0 &&
+      price !== item.lastPrice
+    ) {
+      updateObject.prev_price =
+        item.lastPrice;
+
+      updateObject.last_price =
+        price;
+    }
+  }
+
+  const { error } = await db
+    .from('inventory')
+    .update(updateObject)
+    .eq('id', id);
+
+  if (error) {
+    alert(
+      'שגיאה בהוספת מלאי: ' +
+      error.message
+    );
+
+    return;
+  }
+
+  await loadInventory();
+}
+
+
+/* =========================================
+   הורדת מלאי
+========================================= */
+
+async function deductStock(id) {
+  const item =
+    inventory.find(x => x.id === id);
+
+  const quantity =
+    Number($('qty_' + id).value) || 0;
+
+  if (!item || quantity <= 0) {
+    alert('אנא הזן כמות חיובית');
+    return;
+  }
+
+  if (quantity > item.quantity) {
+    alert('אין מספיק יחידות במלאי');
+    return;
+  }
+
+  const { error } = await db
+    .from('inventory')
+    .update({
+      quantity:
+        item.quantity - quantity,
+      total_consumed:
+        item.totalConsumed + quantity,
+      last_date:
+        now('הורדה')
+    })
+    .eq('id', id);
+
+  if (error) {
+    alert(
+      'שגיאה בהורדת מלאי: ' +
+      error.message
+    );
+
+    return;
+  }
+
+  await loadInventory();
+}
+
+
+/* =========================================
+   סינון וקטגוריות
+========================================= */
+
+function setCategory(category, button) {
+  currentCategory = category;
+
+  document
+    .querySelectorAll('.chip')
+    .forEach(chip => {
+      chip.classList.remove('active');
+    });
+
+  button.classList.add('active');
+
+  render();
+}
+
+
+/* =========================================
+   חלון מלאי נמוך
+========================================= */
+
+function openLowStockModal() {
+  const lowItems =
+    inventory.filter(
+      item =>
+        item.quantity <= item.minStock
+    );
+
+  $('lowStockModalBody').innerHTML =
+    lowItems.length
+      ? lowItems.map(item => `
+        <div class="modal-item">
+          <div>
+            <strong>${esc(item.name)}</strong>
+
+            <div style="font-size:.75rem;color:#94a3b8">
+              ${esc(item.category)}
+              |
+              מחסן: ${esc(item.warehouse)}
+              |
+              מינימום: ${item.minStock}
+            </div>
+          </div>
+
+          <strong style="color:#f87171">
+            כמות: ${item.quantity}
+          </strong>
+        </div>
+      `).join('')
+      : `
+        <div class="empty" style="color:#34d399">
+          אין פריטים בחריגה
+        </div>
+      `;
+
+  $('lowStockModal').classList.add('active');
+}
+
+
+function closeLowStockModal() {
+  $('lowStockModal').classList.remove('active');
+}
+
+
+/* =========================================
+   הצגת הנתונים
+========================================= */
+
+function render() {
+  const searchText =
+    $('searchBox').value
+      .trim()
+      .toLowerCase();
+
+  const filteredItems =
+    inventory.filter(item => {
+      const matchesSearch =
+        item.name
+          .toLowerCase()
+          .includes(searchText) ||
+        item.warehouse
+          .toLowerCase()
+          .includes(searchText);
+
+      const matchesCategory =
+        currentCategory === 'הכל' ||
+        item.category === currentCategory;
+
+      return (
+        matchesSearch &&
+        matchesCategory
+      );
+    });
+
+  $('totalTypesCount').textContent =
+    inventory.length;
+
+  $('totalCount').textContent =
+    inventory.reduce(
+      (total, item) =>
+        total + item.quantity,
+      0
+    );
+
+  const lowStockCount =
+    inventory.filter(
+      item =>
+        item.quantity <= item.minStock
+    ).length;
+
+  $('lowCount').textContent =
+    lowStockCount;
+
+  $('lowCount').style.color =
+    lowStockCount
+      ? '#f87171'
+      : '#34d399';
+
+  const totalInventoryValue =
+    inventory.reduce(
+      (total, item) =>
+        total +
+        item.quantity *
+        item.lastPrice,
+      0
+    );
+
+  $('totalValue').textContent =
+    '₪' +
+    totalInventoryValue.toLocaleString(
+      'he-IL',
+      {
+        maximumFractionDigits:2
+      }
+    );
+
+  if (!filteredItems.length) {
+    $('itemsGrid').innerHTML =
+      '<div class="empty">' +
+      'אין פריטים להצגה כרגע. ' +
+      'הוסף פריט חדש למעלה!' +
+      '</div>';
+
+    return;
+  }
+
+  $('itemsGrid').innerHTML =
+    filteredItems.map(item => {
+
+      if (editingId === item.id) {
+        return `
+          <div class="item-card">
+
+            <div class="edit-form-box">
+
+              <strong>✏️ עריכת פריט</strong>
+
+              <label>שם</label>
+              <input
+                id="edit_name_${item.id}"
+                value="${esc(item.name)}"
+              >
+
+              <label>קטגוריה</label>
+              <select id="edit_cat_${item.id}">
+
+                <option
+                  ${item.category === 'ציוד משרדי' ? 'selected' : ''}
+                >
+                  ציוד משרדי
+                </option>
+
+                <option
+                  ${item.category === 'נייר ודפוס' ? 'selected' : ''}
+                >
+                  נייר ודפוס
+                </option>
+
+                <option
+                  ${item.category === 'אחזקה וניקיון' ? 'selected' : ''}
+                >
+                  אחזקה וניקיון
+                </option>
+
+                <option
+                  ${item.category === 'אחר' ? 'selected' : ''}
+                >
+                  אחר
+                </option>
+
+              </select>
+
+              <label>מחסן / מיקום</label>
+              <input
+                id="edit_wh_${item.id}"
+                value="${esc(item.warehouse)}"
+              >
+
+              <label>מינימום</label>
+              <input
+                type="number"
+                id="edit_min_${item.id}"
+                value="${item.minStock}"
+              >
+
+              <div>
+                <button
+                  type="button"
+                  class="plus-btn"
+                  onclick="saveEdit(${item.id})"
+                >
+                  שמור
+                </button>
+
+                <button
+                  type="button"
+                  class="delete-btn"
+                  onclick="toggleEdit(${item.id})"
+                >
+                  ביטול
+                </button>
+              </div>
+
+            </div>
+
+          </div>
+        `;
+      }
+
+      return `
+        <div class="item-card" id="card_${item.id}">
+
+          <div class="item-header">
+
+            <div>
+              <strong style="font-size:1.1rem">
+                ${esc(item.name)}
+              </strong>
+
+              <br>
+
+              <span class="badge">
+                ${esc(item.category)}
+              </span>
+
+              <span class="badge-warehouse">
+                🏭 ${esc(item.warehouse)}
+              </span>
+            </div>
+
+            <div>
+              <button
+                type="button"
+                class="edit-btn"
+                onclick="toggleEdit(${item.id})"
+              >
+                ✏️ עריכה
+              </button>
+
+              <span class="${
+                item.quantity <= item.minStock
+                  ? 'alert-badge'
+                  : 'ok-badge'
+              }">
+                ${
+                  item.quantity <= item.minStock
+                    ? '⚠️ נמוך'
+                    : '✓ תקין'
+                }
+              </span>
+            </div>
+
+          </div>
+
+          <div class="item-row">
+            <span>כמות במלאי:</span>
+            <strong>${item.quantity}</strong>
+          </div>
+
+          <div class="action-row">
+
+            <div class="action-inputs">
+              <input
+                type="number"
+                id="qty_${item.id}"
+                placeholder="כמות"
+                min="1"
+              >
+
+              <input
+                type="number"
+                id="price_${item.id}"
+                placeholder="מחיר ₪"
+                step="any"
+                min="0"
+              >
+            </div>
+
+            <div class="action-buttons">
+              <button
+                type="button"
+                class="plus-btn"
+                onclick="addStock(${item.id})"
+              >
+                + הוסף סחורה
+              </button>
+
+              <button
+                type="button"
+                class="minus-btn"
+                onclick="deductStock(${item.id})"
+              >
+                - הורד מהמלאי
+              </button>
+            </div>
+
+          </div>
+
+          <div class="item-row">
+            <span>מחיר יחידה נוכחי (₪):</span>
+
+            <input
+              class="table-input"
+              type="number"
+              step="any"
+              value="${item.lastPrice}"
+              onchange="updatePrice(${item.id},this.value)"
+            >
+          </div>
+
+          <div class="history-box">
+            <span>🏷️ מחיר קודם:</span>
+
+            <strong style="color:#fbbf24">
+              ${
+                item.prevPrice > 0
+                  ? '₪' + item.prevPrice
+                  : 'אין מחיר קודם'
+              }
+            </strong>
+          </div>
+
+          <div class="history-box">
+            <span>📊 סה"כ שחרורים:</span>
+            <strong>${item.totalConsumed}</strong>
+          </div>
+
+          <div class="history-box">
+            <span>🕒 פעילות אחרונה:</span>
+            <strong>${esc(item.lastDate)}</strong>
+          </div>
+
+          <div class="item-row">
+            <span>
+              מינימום: ${item.minStock}
+            </span>
+
+            <button
+              type="button"
+              class="delete-btn"
+              onclick="deleteItem(${item.id})"
+            >
+              מחק פריט
+            </button>
+          </div>
+
+        </div>
+      `;
+
+    }).join('');
+}
+
+
+/* =========================================
+   ייצוא לאקסל / CSV
+========================================= */
+
+function exportToExcel() {
+  if (!inventory.length) {
+    alert('אין פריטים לייצוא');
+    return;
+  }
+
+  const sortedInventory =
+    [...inventory].sort(
+      (a, b) =>
+        a.warehouse.localeCompare(
+          b.warehouse,
+          'he'
+        )
+    );
+
+  let csv =
+    '\uFEFFמחסן,שם פריט,קטגוריה,כמות נוכחית,מינימום,מחיר נוכחי,מחיר קודם,סך הכל שחרורים,פעילות אחרונה\n';
+
+  sortedInventory.forEach(item => {
+    csv +=
+      `"${item.warehouse.replaceAll('"','""')}",` +
+      `"${item.name.replaceAll('"','""')}",` +
+      `"${item.category.replaceAll('"','""')}",` +
+      `${item.quantity},` +
+      `${item.minStock},` +
+      `${item.lastPrice},` +
+      `${item.prevPrice},` +
+      `${item.totalConsumed},` +
+      `"${String(item.lastDate).replaceAll('"','""')}"\n`;
+  });
+
+  const blob = new Blob(
+    [csv],
+    {
+      type:'text/csv;charset=utf-8;'
+    }
+  );
+
+  const url =
+    URL.createObjectURL(blob);
+
+  const link =
+    document.createElement('a');
+
+  link.href = url;
+
+  link.download =
+    'inventory_report_by_warehouse.csv';
+
+  link.click();
+
+  URL.revokeObjectURL(url);
+}
+
+
+/* =========================================
+   אירועים והפעלת המערכת
+========================================= */
+
+$('searchBox').addEventListener(
+  'input',
+  render
+);
+
+$('addForm').addEventListener(
+  'submit',
+  addItem
+);
+
+
+async function initApp() {
   try {
-    if(!window.supabase) throw new Error('ספריית Supabase לא נטענה');
-    db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    await checkSavedSession();
-  } catch(e) {
-    console.error(e);
-    $('dbStatus').textContent='🔴 '+e.message;
-    $('dbStatus').style.color='#f87171';
+    if (!window.supabase) {
+      throw new Error(
+        'ספריית Supabase לא נטענה'
+      );
+    }
+
+    db =
+      window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+      );
+
+    checkSavedSession();
+
+  } catch (error) {
+    console.error(error);
+
+    $('dbStatus').textContent =
+      '🔴 ' + error.message;
+
+    $('dbStatus').style.color =
+      '#f87171';
   }
 }
 
-if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', initApp);
-else initApp();
+
+if (document.readyState === 'loading') {
+  document.addEventListener(
+    'DOMContentLoaded',
+    initApp
+  );
+} else {
+  initApp();
+}
 </script>
+
 </body>
 </html>
