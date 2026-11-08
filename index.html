@@ -466,4 +466,1655 @@ header{padding:15px}
 .grid-container{grid-template-columns:1fr}
 .action-inputs,.action-buttons{flex-direction:column}
 }
-/* 
+/* ==================================================
+עיצוב משודרג
+================================================== */
+:root{
+--bg:#0b1020;
+--panel:#121a2e;
+--panel-2:#17213a;
+--line:#243050;
+--text:#eef2ff;
+--muted:#8b97b5;
+--brand:#7c6cff;
+--brand-2:#4f8cff;
+--ok:#22c55e;
+--bad:#f43f5e;
+--warn:#f59e0b;
+--radius:18px;
+}
+body{
+font-family:'Heebo','Segoe UI',Tahoma,Arial,sans-serif;
+background:
+radial-gradient(1200px 600px at 85% -10%,#3b2f8f55,transparent 60%),
+radial-gradient(900px 500px at -10% 10%,#1d4ed855,transparent 60%),
+var(--bg);
+background-attachment:fixed;
+color:var(--text);
+letter-spacing:.1px
+}
+/* כותרת עליונה */
+header{
+background:rgba(13,18,36,.72);
+backdrop-filter:blur(14px);
+-webkit-backdrop-filter:blur(14px);
+border-bottom:1px solid #ffffff12;
+box-shadow:0 8px 30px #0006;
+padding:16px 32px
+}
+h1{
+font-size:1.6rem;
+font-weight:800;
+background:linear-gradient(90deg,#fff,#c4b5fd 60%,#93c5fd);
+-webkit-background-clip:text;
+background-clip:text;
+color:transparent
+}
+header p{color:var(--muted)}
+#dbStatus{
+display:inline-block;
+margin-top:6px;
+padding:3px 10px;
+border-radius:999px;
+background:#ffffff0d;
+border:1px solid #ffffff14;
+font-weight:600
+}
+header button{
+border-radius:12px!important;
+padding:10px 16px!important;
+font-weight:700;
+transition:transform .15s,box-shadow .15s,filter .15s
+}
+header button:hover{transform:translateY(-2px);filter:brightness(1.1)}
+.export-btn{background:linear-gradient(135deg,#10b981,#059669);box-shadow:0 6px 18px #10b98140}
+.report-btn{background:linear-gradient(135deg,#3b82f6,#2563eb);box-shadow:0 6px 18px #3b82f640}
+/* כרטיסים כלליים */
+.container{max-width:1240px;margin-top:28px}
+.card{
+background:linear-gradient(180deg,var(--panel-2),var(--panel));
+border:1px solid var(--line);
+border-radius:var(--radius);
+box-shadow:0 20px 40px #0005, inset 0 1px 0 #ffffff0a
+}
+.section-title{
+font-size:1.15rem;
+font-weight:800;
+display:flex;
+align-items:center;
+gap:8px
+}
+/* שדות */
+label{color:#a5b0cf;font-weight:600;font-size:.78rem}
+input,select{
+background:#0b1222;
+border:1px solid #2a3658;
+border-radius:12px;
+color:var(--text);
+font-family:inherit;
+transition:border-color .15s,box-shadow .15s
+}
+input::placeholder{color:#5d6a8c}
+input:focus,select:focus{
+outline:none;
+border-color:var(--brand);
+box-shadow:0 0 0 4px #7c6cff2e
+}
+.primary-btn{
+background:linear-gradient(135deg,var(--brand),var(--brand-2));
+border-radius:12px;
+padding:13px;
+font-size:.95rem;
+box-shadow:0 8px 20px #7c6cff40;
+transition:transform .15s,box-shadow .15s
+}
+.primary-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 12px 26px #7c6cff55}
+/* קוביות סטטיסטיקה */
+.stats-grid{gap:14px}
+.stat-card{
+background:linear-gradient(180deg,var(--panel-2),var(--panel));
+border:1px solid var(--line);
+border-radius:var(--radius);
+padding:18px;
+position:relative;
+overflow:hidden;
+transition:transform .2s,border-color .2s
+}
+.stat-card::before{
+content:'';
+position:absolute;
+inset:0 0 auto 0;
+height:3px;
+background:var(--accent,var(--brand))
+}
+.stat-card:hover{transform:translateY(-3px);border-color:#3a4a78}
+.stat-card:nth-child(1){--accent:linear-gradient(90deg,#8b5cf6,#6366f1)}
+.stat-card:nth-child(2){--accent:linear-gradient(90deg,#3b82f6,#06b6d4)}
+.stat-card:nth-child(3){--accent:linear-gradient(90deg,#f59e0b,#ef4444)}
+.stat-card:nth-child(4){--accent:linear-gradient(90deg,#f43f5e,#ec4899)}
+.stat-card:nth-child(5){--accent:linear-gradient(90deg,#10b981,#22c55e)}
+.stat-icon{
+width:48px;height:48px;border-radius:14px;
+background:#ffffff0d;border:1px solid #ffffff12;
+font-size:1.35rem
+}
+.stat-label{color:var(--muted);font-size:.78rem}
+.stat-value{font-size:1.6rem;letter-spacing:-.5px}
+/* סינון */
+.filter-bar{align-items:center}
+.search-box{border-radius:999px;padding-inline:18px}
+.month-picker{border-radius:999px;background:#0b1222;border-color:#2a3658}
+.chip{
+background:#0b1222;
+border:1px solid #2a3658;
+color:#a5b0cf;
+font-family:inherit;
+font-weight:600;
+transition:all .15s
+}
+.chip:hover{border-color:var(--brand);color:#fff}
+.chip.active{
+background:linear-gradient(135deg,var(--brand),var(--brand-2));
+border-color:transparent;
+box-shadow:0 6px 16px #7c6cff40
+}
+/* כרטיס פריט */
+.grid-container{gap:18px}
+.item-card{
+background:linear-gradient(180deg,var(--panel-2),var(--panel));
+border:1px solid var(--line);
+border-radius:var(--radius);
+padding:18px;
+gap:14px;
+position:relative;
+box-shadow:0 14px 30px #0004;
+transition:transform .2s,box-shadow .2s,border-color .2s
+}
+.item-card::before{
+content:'';
+position:absolute;
+inset:0 0 auto 0;
+height:4px;
+border-radius:var(--radius) var(--radius) 0 0;
+background:linear-gradient(90deg,#22c55e,#10b981)
+}
+.item-card.low::before{background:linear-gradient(90deg,#f43f5e,#f59e0b)}
+.item-card:hover{transform:translateY(-3px);box-shadow:0 20px 40px #0006;border-color:#34446e}
+.item-header{border-bottom:1px solid var(--line);padding-bottom:12px;gap:10px}
+.item-header strong{font-size:1.15rem!important;font-weight:800}
+.item-header > div:last-child{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.badge,.badge-warehouse{
+display:inline-block;
+margin-top:6px;
+border-radius:999px;
+padding:3px 10px;
+font-weight:600
+}
+.badge{background:#7c6cff22;color:#c4b5fd;border:1px solid #7c6cff44}
+.badge-warehouse{background:#0ea5e922;color:#7dd3fc;border:1px solid #0ea5e944}
+.ok-badge,.alert-badge{border-radius:999px;padding:3px 10px;font-size:.72rem}
+.ok-badge{background:#22c55e1f;color:#4ade80;border:1px solid #22c55e44}
+.alert-badge{background:#f43f5e1f;color:#fb7185;border:1px solid #f43f5e44}
+.qty-hero{
+display:flex;
+align-items:baseline;
+justify-content:space-between;
+background:#0b1222;
+border:1px solid var(--line);
+border-radius:14px;
+padding:12px 16px
+}
+.qty-hero .lbl{color:var(--muted);font-size:.85rem;font-weight:600}
+.qty-hero .val{font-size:2rem;font-weight:800;letter-spacing:-1px}
+.qty-hero .val small{font-size:.8rem;color:var(--muted);font-weight:600;margin-right:6px}
+.item-card.low .qty-hero .val{color:#fb7185}
+.action-row{background:#0b1222;border:1px solid var(--line);border-radius:14px;padding:10px}
+.action-inputs input{border-radius:10px}
+.action-buttons button{flex:1}
+.plus-btn,.minus-btn,.edit-btn,.delete-btn{
+border-radius:10px;
+padding:9px 12px;
+font-family:inherit;
+font-weight:700;
+transition:transform .12s,filter .12s
+}
+.plus-btn:hover,.minus-btn:hover,.edit-btn:hover,.delete-btn:hover{transform:translateY(-1px);filter:brightness(1.12)}
+.plus-btn{background:linear-gradient(135deg,#22c55e,#16a34a);box-shadow:0 6px 14px #22c55e33}
+.minus-btn{background:linear-gradient(135deg,#f43f5e,#e11d48);box-shadow:0 6px 14px #f43f5e33}
+.edit-btn{background:#7c6cff1f;color:#c4b5fd;border:1px solid #7c6cff55;padding:6px 10px;font-size:.8rem}
+.delete-btn{background:#f43f5e14;color:#fda4af;border:1px solid #f43f5e44}
+.undo-btn{border-radius:10px;font-family:inherit}
+.history-box{background:#0b1222;border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.table-input{max-width:120px;border-radius:10px}
+/* קוביות חודשיות והיסטוריה */
+.month-box{background:#0b1222;border:1px solid var(--line);border-radius:14px}
+.month-box.out{background:linear-gradient(180deg,#f43f5e14,#0b1222)}
+.month-box.cnt{background:linear-gradient(180deg,#7c6cff14,#0b1222)}
+.month-box .num{font-size:1.6rem}
+.moves{background:#0b1222;border:1px solid var(--line);border-radius:14px}
+.month-head{background:#17213a;border:1px solid var(--line)}
+/* חלון קופץ */
+.modal-overlay{backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.modal-content{background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 30px 60px #0008}
+/* פס גלילה */
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:#2a3658;border-radius:10px;border:2px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-track{background:transparent}
+@media(max-width:650px){
+header{padding:14px}
+h1{font-size:1.3rem}
+.qty-hero .val{font-size:1.6rem}
+}
+</style>
+</head>
+<body>
+<!-- מסך כניסה באמצעות סיסמה בלבד -->
+<div id="loginOverlay" style="position:fixed;inset:0;background:#0f172af0;display:flex;align-items:center;justify-content:center;z-index:9999;">
+  <div class="card" style="max-width:360px;width:90%;text-align:center;margin:0;">
+    <div class="section-title">🔐 כניסה למערכת</div>
+
+    <p style="margin-bottom:16px;">
+      יש להזין את סיסמת המערכת
+    </p>
+
+    <form onsubmit="handleLoginSubmit(event)" style="display:flex;flex-direction:column;gap:12px;">
+      <input
+        type="password"
+        id="passInput"
+        placeholder="סיסמה..."
+        style="text-align:center;"
+        required
+        autofocus
+        autocomplete="current-password"
+      >
+
+      <button type="submit" class="primary-btn" id="loginBtn">
+        כניסה
+      </button>
+
+      <p id="passError" style="color:#f87171;margin:0;display:none;font-size:.85rem;">
+        הסיסמה שגויה
+      </p>
+    </form>
+  </div>
+</div>
+
+<header>
+<div class="header-content">
+<div>
+<h1>📦 ניהול מלאי חכם</h1>
+<p>מערכת מלאי משותפת בענן <span style="opacity:.55;font-size:.7rem">· גרסה 8.11.26-ד</span></p>
+<p id="dbStatus">🔒 המערכת נעולה</p>
+</div>
+<div style="display:flex;gap:10px;align-items:center;">
+<button type="button" class="export-btn" onclick="exportToExcel()">
+📥 ייצוא לאקסל
+</button>
+<button type="button" class="report-btn" onclick="exportMonthlyReport()">
+📋 דוח הורדות חודשי
+</button>
+<button type="button" class="delete-btn" onclick="lockApp()">
+🔒 נעילה
+</button>
+</div>
+</div>
+</header>
+<div class="container">
+<div class="card">
+<div class="section-title">➕ הוספת פריט חדש למלאי</div>
+<form id="addForm" class="form">
+<div class="input-group">
+<label>שם הפריט</label>
+<input id="newName" required placeholder="למשל: דפים A4">
+</div>
+<div class="input-group">
+<label>קטגוריה</label>
+<select id="newCategory">
+<option>ציוד משרדי</option>
+<option>נייר ודפוס</option>
+<option>אחזקה וניקיון</option>
+<option>אחר</option>
+</select>
+</div>
+<div class="input-group">
+<label>מחסן / מיקום</label>
+<input id="newWarehouse" placeholder="למשל: מחסן מרכזי, מדף ב'...">
+</div>
+<div class="input-group">
+<label>כמות התחלתית</label>
+<input type="number" id="newQuantity" value="0" min="0" required>
+</div>
+<div class="input-group">
+<label>מינימום התראה</label>
+<input type="number" id="newMin" value="5" min="0">
+</div>
+<div class="input-group">
+<label>מחיר יחידה (₪)</label>
+<input type="number" id="newPrice" value="0" step="any" min="0">
+</div>
+<div>
+<button id="addBtn" class="primary-btn" type="submit">
+הוסף פריט
+</button>
+</div>
+</form>
+</div>
+<div class="stats-grid">
+<div class="stat-card">
+<div class="stat-icon">🏷️</div>
+<div>
+<span class="stat-label">סה"כ סוגי פריטים</span>
+<div class="stat-value" id="totalTypesCount">0</div>
+</div>
+</div>
+<div class="stat-card">
+<div class="stat-icon">📦</div>
+<div>
+<span class="stat-label">סה"כ יחידות במלאי</span>
+<div class="stat-value" id="totalCount">0</div>
+</div>
+</div>
+<div class="stat-card clickable" onclick="openLowStockModal()">
+<div class="stat-icon">⚠️</div>
+<div>
+<span class="stat-label">פריטים במלאי נמוך</span>
+<div class="stat-value" id="lowCount">0</div>
+</div>
+</div>
+<div class="stat-card">
+<div class="stat-icon">📉</div>
+<div>
+<span class="stat-label" id="monthOutLabel">הורדות החודש</span>
+<div class="stat-value" id="monthOutUnits" style="color:#f87171">0</div>
+<span class="stat-label" id="monthOutMeta">0 פעמים · ₪0</span>
+</div>
+</div>
+<div class="stat-card">
+<div class="stat-icon">💰</div>
+<div>
+<span class="stat-label">שווי כולל של המלאי</span>
+<div class="stat-value" id="totalValue">₪0</div>
+</div>
+</div>
+</div>
+<div class="filter-bar">
+<div class="month-picker">
+<label for="monthSelect">📅 חודש:</label>
+<select id="monthSelect" onchange="setMonth(this.value)"></select>
+</div>
+<input
+class="search-box"
+id="searchBox"
+placeholder="🔍 חיפוש פריט מהיר..."
+>
+<div class="chips">
+<button type="button" class="chip active" onclick="setCategory('הכל',this)">
+הכל
+</button>
+<button type="button" class="chip" onclick="setCategory('ציוד משרדי',this)">
+ציוד משרדי
+</button>
+<button type="button" class="chip" onclick="setCategory('נייר ודפוס',this)">
+נייר ודפוס
+</button>
+<button type="button" class="chip" onclick="setCategory('אחזקה וניקיון',this)">
+אחזקה וניקיון
+</button>
+<button type="button" class="chip" onclick="setCategory('אחר',this)">
+אחר
+</button>
+</div>
+</div>
+<div class="grid-container" id="itemsGrid">
+<div class="empty">הזן סיסמה כדי להציג את המלאי</div>
+</div>
+</div>
+<div class="modal-overlay" id="lowStockModal">
+<div class="modal-content">
+<div style="display:flex;justify-content:space-between">
+<strong style="color:#f87171">
+⚠️ פריטים מתחת למינימום
+</strong>
+<button type="button" class="delete-btn" onclick="closeLowStockModal()">
+✕
+</button>
+</div>
+<div id="lowStockModalBody"></div>
+</div>
+</div>
+<script>
+const SUPABASE_URL = 'https://wsxwrzmrzrwcnwowsgve.supabase.co';
+const SUPABASE_KEY =
+'sb_publishable_5Wh7wSRJIXOg4nqLhLyTmg_2Ny1OJ7l';
+const LOGIN_FUNCTION_URL =
+SUPABASE_URL + '/functions/v1/inventory-login';
+let db;
+let inventory = [];
+let currentCategory = 'הכל';
+let editingId = null;
+let movementsColumnMissing = false;
+const openHistory = new Set();
+let selectedMonth = null; // נקבע ב-initApp
+const $ = id => document.getElementById(id);
+/* =========================================
+   כניסה באמצעות סיסמה בלבד
+========================================= */
+
+function checkSavedSession() {
+  const loggedIn =
+    sessionStorage.getItem('inventory_logged_in') === 'true';
+
+  if (loggedIn) {
+    $('loginOverlay').style.display = 'none';
+    loadInventory();
+  } else {
+    $('loginOverlay').style.display = 'flex';
+    $('dbStatus').textContent = '🔒 המערכת נעולה';
+    $('dbStatus').style.color = '#fbbf24';
+  }
+}
+
+
+async function handleLoginSubmit(event) {
+  event.preventDefault();
+
+  const password = ($('passInput').value || '').trim();
+  const loginBtn = $('loginBtn');
+  const passError = $('passError');
+
+  passError.style.display = 'none';
+  passError.textContent = '';
+
+  if (!password) {
+    passError.textContent = 'יש להזין סיסמה';
+    passError.style.display = 'block';
+    return;
+  }
+
+  loginBtn.disabled = true;
+  loginBtn.textContent = 'בודק סיסמה...';
+
+  try {
+    const response = await fetch(LOGIN_FUNCTION_URL, {
+      method: 'POST',
+
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY
+      },
+
+      body: JSON.stringify({
+        password: password
+      })
+    });
+
+    let result = {};
+
+    try {
+      result = await response.json();
+    } catch (jsonError) {
+      console.error('תשובת הפונקציה אינה JSON:', jsonError);
+    }
+
+    if (!response.ok || result.success !== true) {
+      throw new Error(
+        result.error || 'הסיסמה שגויה'
+      );
+    }
+
+    sessionStorage.setItem(
+      'inventory_logged_in',
+      'true'
+    );
+
+    $('passInput').value = '';
+    $('loginOverlay').style.display = 'none';
+
+    await loadInventory();
+
+  } catch (error) {
+    console.error('Login error:', error);
+
+    if (
+      error.message === 'Failed to fetch' ||
+      error.message.includes('NetworkError')
+    ) {
+      passError.textContent =
+        'לא ניתן להתחבר לשרת. בדוק שפונקציית inventory-login פעילה.';
+    } else {
+      passError.textContent = 'הסיסמה שגויה';
+    }
+
+    passError.style.display = 'block';
+
+  } finally {
+    loginBtn.disabled = false;
+    loginBtn.textContent = 'כניסה';
+  }
+}
+
+
+function lockApp() {
+  sessionStorage.removeItem('inventory_logged_in');
+
+  inventory = [];
+  editingId = null;
+
+  if ($('passInput')) {
+    $('passInput').value = '';
+  }
+
+  $('itemsGrid').innerHTML =
+    '<div class="empty">הזן סיסמה כדי להציג את המלאי</div>';
+
+  $('totalTypesCount').textContent = '0';
+  $('totalCount').textContent = '0';
+  $('lowCount').textContent = '0';
+  $('totalValue').textContent = '₪0';
+
+  $('dbStatus').textContent = '🔒 המערכת נעולה';
+  $('dbStatus').style.color = '#fbbf24';
+
+  $('loginOverlay').style.display = 'flex';
+
+  setTimeout(() => {
+    $('passInput').focus();
+  }, 100);
+}
+
+
+/* =========================================
+פונקציות עזר
+========================================= */
+function esc(value) {
+return String(value ?? '')
+.replaceAll('&', '&amp;')
+.replaceAll('<', '&lt;')
+.replaceAll('>', '&gt;')
+.replaceAll('"', '&quot;')
+.replaceAll("'", '&#039;');
+}
+function mapRow(row) {
+return {
+id: Number(row.id),
+name: row.name || '',
+category: row.category || 'אחר',
+warehouse: row.warehouse || 'ראשי',
+quantity: Number(row.quantity || 0),
+minStock: Number(row.min_stock ?? row.minStock ?? 0),
+lastPrice: Number(row.last_price ?? row.lastPrice ?? 0),
+prevPrice: Number(row.prev_price ?? row.prevPrice ?? 0),
+totalConsumed: Number(
+row.total_consumed ?? row.totalConsumed ?? 0
+),
+lastDate:
+row.last_date ??
+row.lastDate ??
+'טרם עודכן',
+movements: parseMovements(row.movements)
+};
+}
+/* ---------- תנועות מלאי ---------- */
+const MAX_MOVEMENTS = 300;
+function parseMovements(v) {
+let arr = v;
+if (typeof arr === 'string') {
+try { arr = JSON.parse(arr); } catch (e) { arr = []; }
+}
+if (!Array.isArray(arr)) return [];
+return arr.filter(mv => mv && !isNaN(new Date(mv.d)));
+}
+function curMonth() {
+if (!selectedMonth) selectedMonth = monthKey(new Date());
+return selectedMonth;
+}
+function isOutMove(mv) {
+return String(mv.t) === 'out';
+}
+function withMovement(item, type, qty, after, priceBefore) {
+const mv = {
+t: type,              // 'out' = הורדה, 'in' = הוספה
+q: qty,
+a: after,             // כמות שנשארה אחרי הפעולה
+d: new Date().toISOString(),
+pr: item.lastPrice    // מחיר יחידה בזמן הפעולה
+};
+if (priceBefore) {
+mv.p = priceBefore;   // מחירים לפני שינוי – לצורך ביטול
+}
+return [
+mv,
+...item.movements
+].slice(0, MAX_MOVEMENTS);
+}
+function monthKey(date) {
+return date.getFullYear() + '-' +
+String(date.getMonth() + 1).padStart(2, '0');
+}
+function monthTitle(key) {
+const [y, m] = key.split('-').map(Number);
+return new Date(y, m - 1, 1).toLocaleDateString(
+'he-IL',
+{ month: 'long', year: 'numeric' }
+);
+}
+function monthStats(item, key) {
+key = key || curMonth();
+const outs = item.movements.filter(
+mv => isOutMove(mv) &&
+monthKey(new Date(mv.d)) === key
+);
+return {
+count: outs.length,
+total: outs.reduce((s, mv) => s + Number(mv.q || 0), 0)
+};
+}
+function isCurrentMonth(key) {
+return key === monthKey(new Date());
+}
+function monthPhrase(key) {
+return isCurrentMonth(key) ? 'החודש' : 'ב' + monthTitle(key);
+}
+function setMonth(key) {
+selectedMonth = key;
+render();
+}
+function buildMonthOptions() {
+const keys = new Set([monthKey(new Date())]);
+inventory.forEach(item =>
+item.movements.forEach(mv => keys.add(monthKey(new Date(mv.d))))
+);
+keys.add(curMonth());
+const sorted = [...keys].sort().reverse();
+$('monthSelect').innerHTML = sorted.map(k => `
+<option value="${k}" ${k === curMonth() ? 'selected' : ''}>
+${esc(monthTitle(k))}${isCurrentMonth(k) ? ' (נוכחי)' : ''}
+</option>`).join('');
+}
+function shortDate(iso) {
+const d = new Date(iso);
+return d.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit' }) +
+' ' + d.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+}
+function toggleHistory(id, open) {
+if (open) openHistory.add(id);
+else openHistory.delete(id);
+}
+function movementsHtml(item) {
+const stats = monthStats(item, curMonth());
+const phrase = esc(monthPhrase(curMonth()));
+const summary = `
+<div class="month-summary">
+<div class="month-box out">
+<span class="lbl">📉 הורדו ${phrase}</span>
+<span class="num">${stats.total}</span>
+<span class="lbl">יחידות</span>
+</div>
+<div class="month-box cnt">
+<span class="lbl">🔁 מספר הורדות ${phrase}</span>
+<span class="num">${stats.count}</span>
+<span class="lbl">פעמים</span>
+</div>
+</div>`;
+if (!item.movements.length) {
+return summary + `
+<details class="moves">
+<summary>📋 היסטוריית תנועות</summary>
+<div class="moves-empty">
+${movementsColumnMissing
+? 'היסטוריה לא נשמרת – יש להוסיף את עמודת movements בטבלה'
+: 'עדיין אין תנועות רשומות'}
+</div>
+</details>`;
+}
+// קיבוץ לפי חודש
+const groups = {};
+item.movements.forEach((mv, idx) => {
+const k = monthKey(new Date(mv.d));
+(groups[k] = groups[k] || []).push({ ...mv, _i: idx });
+});
+const body = Object.keys(groups)
+.sort()
+.reverse()
+.map(k => {
+const st = monthStats(item, k);
+const rows = groups[k].map(mv => {
+const d = new Date(mv.d);
+const isOut = mv.t === 'out';
+return `
+<div class="move-row">
+<span class="move-qty ${isOut ? 'out' : 'in'}">
+${isOut ? '−' : '+'}${Number(mv.q)}
+</span>
+<span class="move-date">
+${d.toLocaleDateString('he-IL', { weekday: 'short', day: '2-digit', month: '2-digit' })}
+<small>${d.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}</small>
+</span>
+<span class="move-after">
+נשארו ${Number(mv.a)}
+<button type="button" class="mv-btn" title="תיקון כמות"
+onclick="editMovement(${item.id}, ${mv._i})">✏️</button>
+<button type="button" class="mv-btn del" title="מחיקת הפעולה"
+onclick="deleteMovement(${item.id}, ${mv._i})">🗑️</button>
+</span>
+</div>`;
+}).join('');
+return `
+<div class="month-head">
+<span>🗓️ ${esc(monthTitle(k))}</span>
+<span>${st.count
+? `הורדו ${st.total} יח' ב-${st.count} פעמים`
+: 'ללא הורדות'}</span>
+</div>
+${rows}`;
+}).join('');
+return summary + `
+<details class="moves" ${openHistory.has(item.id) ? 'open' : ''}
+ontoggle="toggleHistory(${item.id}, this.open)">
+<summary>📋 היסטוריית תנועות (${item.movements.length})</summary>
+<div class="moves-body">${body}</div>
+</details>`;
+}
+/* עדכון שורה – אם עמודת movements לא קיימת, שומר בלי היסטוריה */
+async function updateRow(id, obj) {
+let { error } = await db
+.from('inventory')
+.update(obj)
+.eq('id', id);
+if (
+error &&
+'movements' in obj &&
+/movements/i.test(error.message || '')
+) {
+movementsColumnMissing = true;
+console.warn('עמודת movements חסרה בטבלה – ההיסטוריה לא נשמרת');
+const copy = { ...obj };
+delete copy.movements;
+({ error } = await db
+.from('inventory')
+.update(copy)
+.eq('id', id));
+}
+return error;
+}
+function now(action) {
+return action + ': ' +
+new Date().toLocaleString('he-IL');
+}
+/* =========================================
+טעינת המלאי
+========================================= */
+async function loadInventory() {
+try {
+$('dbStatus').textContent =
+'🟡 טוען נתונים מ-Supabase...';
+$('dbStatus').style.color = '#fbbf24';
+const { data, error } = await db
+.from('inventory')
+.select('*')
+.order('id', { ascending: false });
+if (error) {
+throw error;
+}
+inventory = (data || []).map(mapRow);
+$('dbStatus').textContent =
+'🟢 מחובר ל-Supabase';
+$('dbStatus').style.color = '#34d399';
+render();
+} catch (error) {
+console.error(error);
+$('dbStatus').textContent =
+'🔴 שגיאה: ' + error.message;
+$('dbStatus').style.color = '#f87171';
+$('itemsGrid').innerHTML =
+'<div class="empty">' +
+esc(error.message) +
+'</div>';
+}
+}
+/* =========================================
+הוספת פריט
+========================================= */
+async function addItem(event) {
+event.preventDefault();
+const name = $('newName').value.trim();
+if (!name) {
+return;
+}
+const itemObj = {
+name: name,
+category: $('newCategory').value,
+warehouse:
+$('newWarehouse').value.trim() || 'ראשי',
+quantity:
+Number($('newQuantity').value) || 0,
+min_stock:
+Number($('newMin').value) || 0,
+last_price:
+Number($('newPrice').value) || 0
+};
+const addBtn = $('addBtn');
+addBtn.disabled = true;
+addBtn.textContent = 'שומר...';
+let error;
+try {
+({ error } = await db
+.from('inventory')
+.insert([itemObj]));
+} finally {
+addBtn.disabled = false;
+addBtn.textContent = 'הוסף פריט';
+}
+if (error) {
+alert(
+'שגיאה בהוספה ל-Supabase:\n' +
+error.message
+);
+console.error(
+'Supabase Insert Error:',
+error
+);
+return;
+}
+$('newName').value = '';
+$('newWarehouse').value = '';
+$('newQuantity').value = '0';
+$('newMin').value = '5';
+$('newPrice').value = '0';
+await loadInventory();
+}
+/* =========================================
+מחיקת פריט
+========================================= */
+async function deleteItem(id) {
+if (!confirm('האם למחוק את הפריט לצמיתות?')) {
+return;
+}
+const { error } = await db
+.from('inventory')
+.delete()
+.eq('id', id);
+if (error) {
+alert(
+'שגיאה במחיקה: ' +
+error.message
+);
+return;
+}
+await loadInventory();
+}
+/* =========================================
+עריכת פריט
+========================================= */
+function toggleEdit(id) {
+editingId =
+editingId === id ? null : id;
+render();
+}
+async function saveEdit(id) {
+const name =
+$('edit_name_' + id).value.trim();
+if (!name) {
+alert('שם הפריט לא יכול להיות ריק');
+return;
+}
+const updatedItem = {
+name: name,
+category:
+$('edit_cat_' + id).value,
+warehouse:
+$('edit_wh_' + id).value.trim() ||
+'ראשי',
+min_stock:
+Math.max(0, Number(
+$('edit_min_' + id).value
+) || 0)
+};
+const { error } = await db
+.from('inventory')
+.update(updatedItem)
+.eq('id', id);
+if (error) {
+alert(
+'שגיאה בשמירה: ' +
+error.message
+);
+return;
+}
+editingId = null;
+await loadInventory();
+}
+/* =========================================
+עדכון מחיר
+========================================= */
+async function updatePrice(id, value) {
+const item =
+inventory.find(x => x.id === id);
+if (!item) {
+return;
+}
+const price = Number(value);
+if (
+value === '' ||
+!Number.isFinite(price) ||
+price < 0
+) {
+alert('אנא הזן מחיר תקין (0 ומעלה)');
+render();
+return;
+}
+if (price === item.lastPrice) {
+return;
+}
+const { error } = await db
+.from('inventory')
+.update({
+prev_price: item.lastPrice,
+last_price: price
+})
+.eq('id', id);
+if (error) {
+alert(
+'שגיאה בעדכון מחיר: ' +
+error.message
+);
+return;
+}
+await loadInventory();
+}
+/* =========================================
+הוספת מלאי
+========================================= */
+async function addStock(id) {
+const item =
+inventory.find(x => x.id === id);
+const quantity =
+Number($('qty_' + id).value) || 0;
+if (!item || quantity <= 0) {
+alert('אנא הזן כמות חיובית');
+return;
+}
+const updateObject = {
+quantity:
+item.quantity + quantity,
+last_date:
+now('הוספה'),
+movements: null
+};
+const priceText =
+$('price_' + id).value;
+if (priceText !== '') {
+const price = Number(priceText);
+if (
+Number.isFinite(price) &&
+price >= 0 &&
+price !== item.lastPrice
+) {
+updateObject.prev_price =
+item.lastPrice;
+updateObject.last_price =
+price;
+}
+}
+updateObject.movements = withMovement(
+item,
+'in',
+quantity,
+item.quantity + quantity,
+'last_price' in updateObject
+? { last: item.lastPrice, prev: item.prevPrice }
+: null
+);
+const error = await updateRow(id, updateObject);
+if (error) {
+alert(
+'שגיאה בהוספת מלאי: ' +
+error.message
+);
+return;
+}
+await loadInventory();
+}
+/* =========================================
+הורדת מלאי
+========================================= */
+async function deductStock(id) {
+const item =
+inventory.find(x => x.id === id);
+const quantity =
+Number($('qty_' + id).value) || 0;
+if (!item || quantity <= 0) {
+alert('אנא הזן כמות חיובית');
+return;
+}
+if (quantity > item.quantity) {
+alert('אין מספיק יחידות במלאי');
+return;
+}
+const error = await updateRow(id, {
+quantity:
+item.quantity - quantity,
+total_consumed:
+item.totalConsumed + quantity,
+last_date:
+now('הורדה'),
+movements:
+withMovement(item, 'out', quantity, item.quantity - quantity)
+});
+if (error) {
+alert(
+'שגיאה בהורדת מלאי: ' +
+error.message
+);
+return;
+}
+await loadInventory();
+}
+/* =========================================
+ביטול פעולה אחרונה
+========================================= */
+async function undoLast(id) {
+const item = inventory.find(x => x.id === id);
+const mv = item && item.movements[0];
+if (!mv) {
+return;
+}
+const isOut = mv.t === 'out';
+const q = Number(mv.q) || 0;
+if (!confirm(
+'לבטל את ה' + (isOut ? 'הורדה' : 'הוספה') +
+' של ' + q + ' יח\' מ-' + shortDate(mv.d) + '?'
+)) {
+return;
+}
+const obj = {
+movements: item.movements.slice(1),
+last_date: now('ביטול ' + (isOut ? 'הורדה' : 'הוספה'))
+};
+if (isOut) {
+obj.quantity = item.quantity + q;
+obj.total_consumed = Math.max(0, item.totalConsumed - q);
+} else {
+if (item.quantity < q) {
+alert('לא ניתן לבטל – הכמות הנוכחית קטנה מהכמות שנוספה');
+return;
+}
+obj.quantity = item.quantity - q;
+if (mv.p) {
+obj.last_price = mv.p.last;
+obj.prev_price = mv.p.prev;
+}
+}
+const error = await updateRow(id, obj);
+if (error) {
+alert('שגיאה בביטול: ' + error.message);
+return;
+}
+await loadInventory();
+}
+/* =========================================
+תיקון / מחיקה של פעולה מההיסטוריה
+========================================= */
+async function changeMovement(id, idx, newQ) {
+const item = inventory.find(x => x.id === id);
+const mv = item && item.movements[idx];
+if (!mv) return;
+const isOut = mv.t === 'out';
+const oldQ = Number(mv.q) || 0;
+const diff = newQ - oldQ;              // כמה להוסיף לפעולה
+if (diff === 0) return;
+// השפעה על המלאי: הורדה גדולה יותר = פחות במלאי
+const stockDelta = isOut ? -diff : diff;
+const newQuantity = item.quantity + stockDelta;
+if (newQuantity < 0) {
+alert('לא ניתן – הכמות במלאי הייתה יורדת מתחת ל-0');
+return;
+}
+// עדכון "נשארו" בפעולה הזו ובכל הפעולות שאחריה
+const moves = item.movements.map((m, i) =>
+i <= idx ? { ...m, a: Number(m.a) + stockDelta } : m
+);
+if (newQ === 0) {
+moves.splice(idx, 1);
+} else {
+moves[idx] = { ...moves[idx], q: newQ };
+}
+const obj = {
+quantity: newQuantity,
+movements: moves,
+last_date: now(newQ === 0 ? 'מחיקת פעולה' : 'תיקון פעולה')
+};
+if (isOut) {
+obj.total_consumed = Math.max(0, item.totalConsumed + diff);
+}
+const error = await updateRow(id, obj);
+if (error) {
+alert('שגיאה בשמירת התיקון: ' + error.message);
+return;
+}
+openHistory.add(id);
+await loadInventory();
+}
+async function editMovement(id, idx) {
+const item = inventory.find(x => x.id === id);
+const mv = item && item.movements[idx];
+if (!mv) return;
+const kind = mv.t === 'out' ? 'הורדה' : 'הוספה';
+const answer = prompt(
+'תיקון ' + kind + ' מ-' + shortDate(mv.d) +
+'\nכמות נוכחית: ' + mv.q + '\nהזן את הכמות הנכונה:',
+mv.q
+);
+if (answer === null) return;
+const newQ = Number(String(answer).trim());
+if (!Number.isFinite(newQ) || newQ < 0 || !Number.isInteger(newQ)) {
+alert('אנא הזן מספר שלם, 0 ומעלה');
+return;
+}
+await changeMovement(id, idx, newQ);
+}
+async function deleteMovement(id, idx) {
+const item = inventory.find(x => x.id === id);
+const mv = item && item.movements[idx];
+if (!mv) return;
+const kind = mv.t === 'out' ? 'ההורדה' : 'ההוספה';
+if (!confirm(
+'למחוק את ' + kind + ' של ' + mv.q + ' יח\' מ-' + shortDate(mv.d) +
+'?\nהכמות במלאי תתעדכן בהתאם.'
+)) return;
+await changeMovement(id, idx, 0);
+}
+/* =========================================
+סינון וקטגוריות
+========================================= */
+function setCategory(category, button) {
+currentCategory = category;
+document
+.querySelectorAll('.chip')
+.forEach(chip => {
+chip.classList.remove('active');
+});
+button.classList.add('active');
+render();
+}
+/* =========================================
+חלון מלאי נמוך
+========================================= */
+function openLowStockModal() {
+const lowItems =
+inventory.filter(
+item =>
+item.quantity <= item.minStock
+);
+$('lowStockModalBody').innerHTML =
+lowItems.length
+? lowItems.map(item => `
+<div class="modal-item">
+<div>
+<strong>${esc(item.name)}</strong>
+<div style="font-size:.75rem;color:#94a3b8">
+${esc(item.category)}
+|
+מחסן: ${esc(item.warehouse)}
+|
+מינימום: ${item.minStock}
+</div>
+</div>
+<strong style="color:#f87171">
+כמות: ${item.quantity}
+</strong>
+</div>
+`).join('')
+: `
+<div class="empty" style="color:#34d399">
+אין פריטים בחריגה
+</div>
+`;
+$('lowStockModal').classList.add('active');
+}
+function closeLowStockModal() {
+$('lowStockModal').classList.remove('active');
+}
+/* =========================================
+הצגת הנתונים
+========================================= */
+function render() {
+const searchText =
+$('searchBox').value
+.trim()
+.toLowerCase();
+const filteredItems =
+inventory.filter(item => {
+const matchesSearch =
+item.name
+.toLowerCase()
+.includes(searchText) ||
+item.warehouse
+.toLowerCase()
+.includes(searchText);
+const matchesCategory =
+currentCategory === 'הכל' ||
+item.category === currentCategory;
+return (
+matchesSearch &&
+matchesCategory
+);
+});
+buildMonthOptions();
+let mUnits = 0, mCount = 0, mValue = 0;
+inventory.forEach(item => {
+item.movements.forEach(mv => {
+if (isOutMove(mv) && monthKey(new Date(mv.d)) === curMonth()) {
+mUnits += Number(mv.q) || 0;
+mCount++;
+mValue += (Number(mv.q) || 0) *
+Number(mv.pr ?? item.lastPrice ?? 0);
+}
+});
+});
+$('monthOutLabel').textContent = 'הורדות ' + monthPhrase(curMonth());
+$('monthOutUnits').textContent = mUnits + ' יח\'';
+$('monthOutMeta').textContent =
+mCount + ' פעמים · ₪' +
+mValue.toLocaleString('he-IL', { maximumFractionDigits: 2 });
+$('totalTypesCount').textContent =
+inventory.length;
+$('totalCount').textContent =
+inventory.reduce(
+(total, item) =>
+total + item.quantity,
+0
+);
+const lowStockCount =
+inventory.filter(
+item =>
+item.quantity <= item.minStock
+).length;
+$('lowCount').textContent =
+lowStockCount;
+$('lowCount').style.color =
+lowStockCount
+? '#f87171'
+: '#34d399';
+const totalInventoryValue =
+inventory.reduce(
+(total, item) =>
+total +
+item.quantity *
+item.lastPrice,
+0
+);
+$('totalValue').textContent =
+'₪' +
+totalInventoryValue.toLocaleString(
+'he-IL',
+{
+maximumFractionDigits:2
+}
+);
+if (!filteredItems.length) {
+$('itemsGrid').innerHTML =
+'<div class="empty">' +
+'אין פריטים להצגה כרגע. ' +
+'הוסף פריט חדש למעלה!' +
+'</div>';
+return;
+}
+$('itemsGrid').innerHTML =
+filteredItems.map(item => {
+if (editingId === item.id) {
+return `
+<div class="item-card">
+<div class="edit-form-box">
+<strong>✏️ עריכת פריט</strong>
+<label>שם</label>
+<input
+id="edit_name_${item.id}"
+value="${esc(item.name)}"
+>
+<label>קטגוריה</label>
+<select id="edit_cat_${item.id}">
+<option
+${item.category === 'ציוד משרדי' ? 'selected' : ''}
+>
+ציוד משרדי
+</option>
+<option
+${item.category === 'נייר ודפוס' ? 'selected' : ''}
+>
+נייר ודפוס
+</option>
+<option
+${item.category === 'אחזקה וניקיון' ? 'selected' : ''}
+>
+אחזקה וניקיון
+</option>
+<option
+${item.category === 'אחר' ? 'selected' : ''}
+>
+אחר
+</option>
+</select>
+<label>מחסן / מיקום</label>
+<input
+id="edit_wh_${item.id}"
+value="${esc(item.warehouse)}"
+>
+<label>מינימום</label>
+<input
+type="number"
+id="edit_min_${item.id}"
+min="0"
+value="${item.minStock}"
+>
+<div>
+<button
+type="button"
+class="plus-btn"
+onclick="saveEdit(${item.id})"
+>
+שמור
+</button>
+<button
+type="button"
+class="delete-btn"
+onclick="toggleEdit(${item.id})"
+>
+ביטול
+</button>
+</div>
+</div>
+</div>
+`;
+}
+return `
+<div class="item-card ${item.quantity <= item.minStock ? 'low' : ''}" id="card_${item.id}">
+<div class="item-header">
+<div>
+<strong style="font-size:1.1rem">
+${esc(item.name)}
+</strong>
+<br>
+<span class="badge">
+${esc(item.category)}
+</span>
+<span class="badge-warehouse">
+🏭 ${esc(item.warehouse)}
+</span>
+</div>
+<div>
+<button
+type="button"
+class="edit-btn"
+onclick="toggleEdit(${item.id})"
+>
+✏️ עריכה
+</button>
+<span class="${
+item.quantity <= item.minStock
+? 'alert-badge'
+: 'ok-badge'
+}">
+${
+item.quantity <= item.minStock
+? '⚠️ נמוך'
+: '✓ תקין'
+}
+</span>
+</div>
+</div>
+<div class="qty-hero">
+<span class="lbl">📦 כמות במלאי</span>
+<span class="val">${item.quantity}<small>יח'</small></span>
+</div>
+<div class="action-row">
+<div class="action-inputs">
+<input
+type="number"
+id="qty_${item.id}"
+placeholder="כמות"
+min="1"
+>
+<input
+type="number"
+id="price_${item.id}"
+placeholder="מחיר ₪"
+step="any"
+min="0"
+>
+</div>
+<div class="action-buttons">
+<button
+type="button"
+class="plus-btn"
+onclick="addStock(${item.id})"
+>
++ הוסף סחורה
+</button>
+<button
+type="button"
+class="minus-btn"
+onclick="deductStock(${item.id})"
+>
+- הורד מהמלאי
+</button>
+</div>
+</div>
+${item.movements.length ? `
+<button
+type="button"
+class="undo-btn"
+onclick="undoLast(${item.id})"
+>
+↩️ בטל פעולה אחרונה:
+${item.movements[0].t === 'out' ? 'הורדה' : 'הוספה'}
+של ${Number(item.movements[0].q)} יח'
+· ${esc(shortDate(item.movements[0].d))}
+</button>` : ''}
+<div class="item-row">
+<span>מחיר יחידה נוכחי (₪):</span>
+<input
+class="table-input"
+type="number"
+step="any"
+min="0"
+value="${item.lastPrice}"
+onchange="updatePrice(${item.id},this.value)"
+>
+</div>
+<div class="history-box">
+<span>🏷️ מחיר קודם:</span>
+<strong style="color:#fbbf24">
+${
+item.prevPrice > 0
+? '₪' + item.prevPrice
+: 'אין מחיר קודם'
+}
+</strong>
+</div>
+${movementsHtml(item)}
+<div class="history-box">
+<span>🕒 פעילות אחרונה:</span>
+<strong>${esc(item.lastDate)}</strong>
+</div>
+<div class="item-row">
+<span>
+מינימום: ${item.minStock}
+</span>
+<button
+type="button"
+class="delete-btn"
+onclick="deleteItem(${item.id})"
+>
+מחק פריט
+</button>
+</div>
+</div>
+`;
+}).join('');
+}
+/* =========================================
+ייצוא לאקסל / CSV
+========================================= */
+function exportToExcel() {
+if (!inventory.length) {
+alert('אין פריטים לייצוא');
+return;
+}
+const sortedInventory =
+[...inventory].sort(
+(a, b) =>
+a.warehouse.localeCompare(
+b.warehouse,
+'he'
+)
+);
+let csv =
+'\uFEFFמחסן,שם פריט,קטגוריה,כמות נוכחית,מינימום,מחיר נוכחי,מחיר קודם,סך הכל שחרורים,' +
+'הורדו ' + monthPhrase(curMonth()) + ' (יחידות),' +
+'מספר הורדות ' + monthPhrase(curMonth()) + ',' +
+'פעילות אחרונה\n';
+const mk = curMonth();
+sortedInventory.forEach(item => {
+csv +=
+`"${item.warehouse.replaceAll('"','""')}",` +
+`"${item.name.replaceAll('"','""')}",` +
+`"${item.category.replaceAll('"','""')}",` +
+`${item.quantity},` +
+`${item.minStock},` +
+`${item.lastPrice},` +
+`${item.prevPrice},` +
+`${item.totalConsumed},` +
+`${monthStats(item, mk).total},` +
+`${monthStats(item, mk).count},` +
+`"${String(item.lastDate).replaceAll('"','""')}"\n`;
+});
+const blob = new Blob(
+[csv],
+{
+type:'text/csv;charset=utf-8;'
+}
+);
+const url =
+URL.createObjectURL(blob);
+const link =
+document.createElement('a');
+link.href = url;
+link.download =
+'inventory_report_by_warehouse.csv';
+document.body.appendChild(link);
+link.click();
+link.remove();
+setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+/* =========================================
+דוח הורדות חודשי – שורה לכל הורדה
+========================================= */
+function csvCell(v) {
+return '"' + String(v ?? '').replaceAll('"', '""') + '"';
+}
+function exportMonthlyReport() {
+const rows = [];
+inventory.forEach(item => {
+item.movements.forEach(mv => {
+if (isOutMove(mv) && monthKey(new Date(mv.d)) === curMonth()) {
+const price = Number(mv.pr ?? item.lastPrice ?? 0);
+rows.push({ item, mv, price, date: new Date(mv.d) });
+}
+});
+});
+if (!rows.length) {
+alert('אין הורדות ב' + monthTitle(curMonth()));
+return;
+}
+rows.sort((a, b) => a.date - b.date);
+let csv = '\uFEFF' +
+'תאריך,שעה,מחסן,שם פריט,קטגוריה,כמות שהורדה,נשארו במלאי,מחיר יחידה,שווי ההורדה\n';
+let totalUnits = 0, totalValue = 0;
+rows.forEach(({ item, mv, price, date }) => {
+const q = Number(mv.q) || 0;
+totalUnits += q;
+totalValue += q * price;
+csv += [
+csvCell(date.toLocaleDateString('he-IL')),
+csvCell(date.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })),
+csvCell(item.warehouse),
+csvCell(item.name),
+csvCell(item.category),
+q,
+Number(mv.a),
+price,
+Math.round(q * price * 100) / 100
+].join(',') + '\n';
+});
+csv += [
+csvCell('סה"כ ' + monthTitle(curMonth())),
+'', '', csvCell(rows.length + ' הורדות'), '',
+totalUnits, '', '',
+Math.round(totalValue * 100) / 100
+].join(',') + '\n';
+const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+const url = URL.createObjectURL(blob);
+const link = document.createElement('a');
+link.href = url;
+link.download = 'deductions_' + curMonth() + '.csv';
+document.body.appendChild(link);
+link.click();
+link.remove();
+setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+/* =========================================
+אירועים והפעלת המערכת
+========================================= */
+$('searchBox').addEventListener(
+'input',
+render
+);
+$('addForm').addEventListener(
+'submit',
+addItem
+);
+$('lowStockModal').addEventListener('click', e => {
+if (e.target === $('lowStockModal')) {
+closeLowStockModal();
+}
+});
+document.addEventListener('keydown', e => {
+if (e.key === 'Escape') {
+closeLowStockModal();
+}
+});
+async function initApp() {
+selectedMonth = monthKey(new Date());
+try {
+if (!window.supabase) {
+throw new Error(
+'ספריית Supabase לא נטענה'
+);
+}
+db =
+window.supabase.createClient(
+SUPABASE_URL,
+SUPABASE_KEY
+);
+checkSavedSession();
+} catch (error) {
+console.error(error);
+$('dbStatus').textContent =
+'🔴 ' + error.message;
+$('dbStatus').style.color =
+'#f87171';
+}
+}
+if (document.readyState === 'loading') {
+document.addEventListener(
+'DOMContentLoaded',
+initApp
+);
+} else {
+initApp();
+}
+</script>
+</body>
+</html>
