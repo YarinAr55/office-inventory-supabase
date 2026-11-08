@@ -128,7 +128,7 @@ button:disabled{
 
 .stats-grid{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  grid-template-columns:repeat(auto-fit,minmax(170px,1fr));
   gap:16px;
   margin-bottom:20px
 }
@@ -377,6 +377,133 @@ button:disabled{
   padding:30px
 }
 
+/* ===== היסטוריית הורדות ===== */
+.month-summary{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px
+}
+.month-box{
+  background:#0f172ab3;
+  border:1px solid #334155;
+  border-radius:10px;
+  padding:10px;
+  text-align:center
+}
+.month-box .num{
+  display:block;
+  font-size:1.35rem;
+  font-weight:800;
+  margin-top:2px
+}
+.month-box .lbl{
+  font-size:.72rem;
+  color:#94a3b8
+}
+.month-box.out .num{color:#f87171}
+.month-box.cnt .num{color:#a5b4fc}
+
+.moves{
+  background:#0f172ab3;
+  border:1px solid #334155;
+  border-radius:10px;
+  font-size:.8rem
+}
+.moves summary{
+  cursor:pointer;
+  padding:10px 12px;
+  font-weight:700;
+  color:#c7d2fe;
+  list-style:none;
+  display:flex;
+  justify-content:space-between;
+  align-items:center
+}
+.moves summary::-webkit-details-marker{display:none}
+.moves summary::after{content:'▾';transition:transform .2s}
+.moves[open] summary::after{transform:rotate(180deg)}
+.moves-body{
+  padding:0 12px 10px;
+  max-height:260px;
+  overflow:auto
+}
+.month-head{
+  position:sticky;
+  top:0;
+  background:#1e293b;
+  border-radius:6px;
+  padding:6px 8px;
+  margin:8px 0 4px;
+  display:flex;
+  justify-content:space-between;
+  font-size:.75rem;
+  color:#e2e8f0;
+  font-weight:700
+}
+.month-head span:last-child{color:#fca5a5;font-weight:600}
+.move-row{
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  gap:10px;
+  align-items:center;
+  padding:6px 4px;
+  border-bottom:1px dashed #334155
+}
+.move-row:last-child{border-bottom:0}
+.move-qty{
+  min-width:54px;
+  text-align:center;
+  padding:3px 8px;
+  border-radius:6px;
+  font-weight:800;
+  direction:ltr
+}
+.move-qty.out{background:#7f1d1d99;color:#fca5a5}
+.move-qty.in{background:#064e3b99;color:#34d399}
+.move-date{color:#e2e8f0}
+.move-date small{color:#64748b;margin-right:6px}
+.move-after{color:#94a3b8;font-size:.72rem}
+.moves-empty{color:#64748b;text-align:center;padding:8px}
+
+.undo-btn{
+  width:100%;
+  background:transparent;
+  color:#fbbf24;
+  border:1px dashed #fbbf2499;
+  border-radius:8px;
+  padding:7px 10px;
+  font-size:.78rem;
+  font-weight:600
+}
+.undo-btn:hover{background:#fbbf2414}
+
+.month-picker{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  background:#1e293b;
+  border:1px solid #6366f180;
+  border-radius:10px;
+  padding:4px 10px
+}
+.month-picker label{white-space:nowrap}
+.month-picker select{
+  border:0;
+  background:transparent;
+  padding:8px 4px;
+  font-weight:700;
+  width:auto
+}
+.month-picker select option{background:#0f172a}
+
+.report-btn{
+  background:#0369a1;
+  color:#fff;
+  border:0;
+  border-radius:8px;
+  padding:10px 16px
+}
+
 @media(max-width:650px){
   header{padding:15px}
   .container{padding:0 10px}
@@ -431,6 +558,10 @@ button:disabled{
     <div style="display:flex;gap:10px;align-items:center;">
       <button type="button" class="export-btn" onclick="exportToExcel()">
         📥 ייצוא לאקסל
+      </button>
+
+      <button type="button" class="report-btn" onclick="exportMonthlyReport()">
+        📋 דוח הורדות חודשי
       </button>
 
       <button type="button" class="delete-btn" onclick="lockApp()">
@@ -518,6 +649,15 @@ button:disabled{
     </div>
 
     <div class="stat-card">
+      <div class="stat-icon">📉</div>
+      <div>
+        <span class="stat-label" id="monthOutLabel">הורדות החודש</span>
+        <div class="stat-value" id="monthOutUnits" style="color:#f87171">0</div>
+        <span class="stat-label" id="monthOutMeta">0 פעמים · ₪0</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
       <div class="stat-icon">💰</div>
       <div>
         <span class="stat-label">שווי כולל של המלאי</span>
@@ -528,6 +668,11 @@ button:disabled{
   </div>
 
   <div class="filter-bar">
+
+    <div class="month-picker">
+      <label for="monthSelect">📅 חודש:</label>
+      <select id="monthSelect" onchange="setMonth(this.value)"></select>
+    </div>
 
     <input
       class="search-box"
@@ -596,6 +741,9 @@ let db;
 let inventory = [];
 let currentCategory = 'הכל';
 let editingId = null;
+let movementsColumnMissing = false;
+const openHistory = new Set();
+let selectedMonth = null; // נקבע ב-initApp
 
 const $ = id => document.getElementById(id);
 
@@ -758,8 +906,195 @@ function mapRow(row) {
     lastDate:
       row.last_date ??
       row.lastDate ??
-      'טרם עודכן'
+      'טרם עודכן',
+    movements:
+      Array.isArray(row.movements) ? row.movements : []
   };
+}
+
+
+/* ---------- תנועות מלאי ---------- */
+
+const MAX_MOVEMENTS = 300;
+
+function withMovement(item, type, qty, after, priceBefore) {
+  const mv = {
+    t: type,              // 'out' = הורדה, 'in' = הוספה
+    q: qty,
+    a: after,             // כמות שנשארה אחרי הפעולה
+    d: new Date().toISOString(),
+    pr: item.lastPrice    // מחיר יחידה בזמן הפעולה
+  };
+  if (priceBefore) {
+    mv.p = priceBefore;   // מחירים לפני שינוי – לצורך ביטול
+  }
+  return [
+    mv,
+    ...item.movements
+  ].slice(0, MAX_MOVEMENTS);
+}
+
+function monthKey(date) {
+  return date.getFullYear() + '-' +
+    String(date.getMonth() + 1).padStart(2, '0');
+}
+
+function monthTitle(key) {
+  const [y, m] = key.split('-').map(Number);
+  return new Date(y, m - 1, 1).toLocaleDateString(
+    'he-IL',
+    { month: 'long', year: 'numeric' }
+  );
+}
+
+function monthStats(item, key) {
+  const outs = item.movements.filter(
+    mv => mv.t === 'out' &&
+      monthKey(new Date(mv.d)) === key
+  );
+  return {
+    count: outs.length,
+    total: outs.reduce((s, mv) => s + Number(mv.q || 0), 0)
+  };
+}
+
+function isCurrentMonth(key) {
+  return key === monthKey(new Date());
+}
+
+function monthPhrase(key) {
+  return isCurrentMonth(key) ? 'החודש' : 'ב' + monthTitle(key);
+}
+
+function setMonth(key) {
+  selectedMonth = key;
+  render();
+}
+
+function buildMonthOptions() {
+  const keys = new Set([monthKey(new Date())]);
+  inventory.forEach(item =>
+    item.movements.forEach(mv => keys.add(monthKey(new Date(mv.d))))
+  );
+  if (selectedMonth) keys.add(selectedMonth);
+
+  const sorted = [...keys].sort().reverse();
+  $('monthSelect').innerHTML = sorted.map(k => `
+    <option value="${k}" ${k === selectedMonth ? 'selected' : ''}>
+      ${esc(monthTitle(k))}${isCurrentMonth(k) ? ' (נוכחי)' : ''}
+    </option>`).join('');
+}
+
+function shortDate(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit' }) +
+    ' ' + d.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+}
+
+function toggleHistory(id, open) {
+  if (open) openHistory.add(id);
+  else openHistory.delete(id);
+}
+
+function movementsHtml(item) {
+  const stats = monthStats(item, selectedMonth);
+  const phrase = esc(monthPhrase(selectedMonth));
+
+  const summary = `
+    <div class="month-summary">
+      <div class="month-box out">
+        <span class="lbl">📉 הורדו ${phrase}</span>
+        <span class="num">${stats.total}</span>
+        <span class="lbl">יחידות</span>
+      </div>
+      <div class="month-box cnt">
+        <span class="lbl">🔁 מספר הורדות ${phrase}</span>
+        <span class="num">${stats.count}</span>
+        <span class="lbl">פעמים</span>
+      </div>
+    </div>`;
+
+  if (!item.movements.length) {
+    return summary + `
+      <details class="moves">
+        <summary>📋 היסטוריית תנועות</summary>
+        <div class="moves-empty">
+          ${movementsColumnMissing
+            ? 'היסטוריה לא נשמרת – יש להוסיף את עמודת movements בטבלה'
+            : 'עדיין אין תנועות רשומות'}
+        </div>
+      </details>`;
+  }
+
+  // קיבוץ לפי חודש
+  const groups = {};
+  item.movements.forEach(mv => {
+    const k = monthKey(new Date(mv.d));
+    (groups[k] = groups[k] || []).push(mv);
+  });
+
+  const body = Object.keys(groups)
+    .sort()
+    .reverse()
+    .map(k => {
+      const st = monthStats(item, k);
+      const rows = groups[k].map(mv => {
+        const d = new Date(mv.d);
+        const isOut = mv.t === 'out';
+        return `
+          <div class="move-row">
+            <span class="move-qty ${isOut ? 'out' : 'in'}">
+              ${isOut ? '−' : '+'}${Number(mv.q)}
+            </span>
+            <span class="move-date">
+              ${d.toLocaleDateString('he-IL', { weekday: 'short', day: '2-digit', month: '2-digit' })}
+              <small>${d.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}</small>
+            </span>
+            <span class="move-after">נשארו ${Number(mv.a)}</span>
+          </div>`;
+      }).join('');
+
+      return `
+        <div class="month-head">
+          <span>🗓️ ${esc(monthTitle(k))}</span>
+          <span>${st.count
+            ? `הורדו ${st.total} יח' ב-${st.count} פעמים`
+            : 'ללא הורדות'}</span>
+        </div>
+        ${rows}`;
+    }).join('');
+
+  return summary + `
+    <details class="moves" ${openHistory.has(item.id) ? 'open' : ''}
+      ontoggle="toggleHistory(${item.id}, this.open)">
+      <summary>📋 היסטוריית תנועות (${item.movements.length})</summary>
+      <div class="moves-body">${body}</div>
+    </details>`;
+}
+
+/* עדכון שורה – אם עמודת movements לא קיימת, שומר בלי היסטוריה */
+async function updateRow(id, obj) {
+  let { error } = await db
+    .from('inventory')
+    .update(obj)
+    .eq('id', id);
+
+  if (
+    error &&
+    'movements' in obj &&
+    /movements/i.test(error.message || '')
+  ) {
+    movementsColumnMissing = true;
+    console.warn('עמודת movements חסרה בטבלה – ההיסטוריה לא נשמרת');
+    const copy = { ...obj };
+    delete copy.movements;
+    ({ error } = await db
+      .from('inventory')
+      .update(copy)
+      .eq('id', id));
+  }
+
+  return error;
 }
 
 
@@ -840,9 +1175,19 @@ async function addItem(event) {
       Number($('newPrice').value) || 0
   };
 
-  const { error } = await db
-    .from('inventory')
-    .insert([itemObj]);
+  const addBtn = $('addBtn');
+  addBtn.disabled = true;
+  addBtn.textContent = 'שומר...';
+
+  let error;
+  try {
+    ({ error } = await db
+      .from('inventory')
+      .insert([itemObj]));
+  } finally {
+    addBtn.disabled = false;
+    addBtn.textContent = 'הוסף פריט';
+  }
 
   if (error) {
     alert(
@@ -924,9 +1269,9 @@ async function saveEdit(id) {
       $('edit_wh_' + id).value.trim() ||
       'ראשי',
     min_stock:
-      Number(
+      Math.max(0, Number(
         $('edit_min_' + id).value
-      ) || 0
+      ) || 0)
   };
 
   const { error } = await db
@@ -961,7 +1306,17 @@ async function updatePrice(id, value) {
     return;
   }
 
-  const price = Number(value) || 0;
+  const price = Number(value);
+
+  if (
+    value === '' ||
+    !Number.isFinite(price) ||
+    price < 0
+  ) {
+    alert('אנא הזן מחיר תקין (0 ומעלה)');
+    render();
+    return;
+  }
 
   if (price === item.lastPrice) {
     return;
@@ -1008,7 +1363,8 @@ async function addStock(id) {
     quantity:
       item.quantity + quantity,
     last_date:
-      now('הוספה')
+      now('הוספה'),
+    movements: null
   };
 
   const priceText =
@@ -1030,10 +1386,17 @@ async function addStock(id) {
     }
   }
 
-  const { error } = await db
-    .from('inventory')
-    .update(updateObject)
-    .eq('id', id);
+  updateObject.movements = withMovement(
+    item,
+    'in',
+    quantity,
+    item.quantity + quantity,
+    'last_price' in updateObject
+      ? { last: item.lastPrice, prev: item.prevPrice }
+      : null
+  );
+
+  const error = await updateRow(id, updateObject);
 
   if (error) {
     alert(
@@ -1069,17 +1432,16 @@ async function deductStock(id) {
     return;
   }
 
-  const { error } = await db
-    .from('inventory')
-    .update({
-      quantity:
-        item.quantity - quantity,
-      total_consumed:
-        item.totalConsumed + quantity,
-      last_date:
-        now('הורדה')
-    })
-    .eq('id', id);
+  const error = await updateRow(id, {
+    quantity:
+      item.quantity - quantity,
+    total_consumed:
+      item.totalConsumed + quantity,
+    last_date:
+      now('הורדה'),
+    movements:
+      withMovement(item, 'out', quantity, item.quantity - quantity)
+  });
 
   if (error) {
     alert(
@@ -1087,6 +1449,59 @@ async function deductStock(id) {
       error.message
     );
 
+    return;
+  }
+
+  await loadInventory();
+}
+
+
+/* =========================================
+   ביטול פעולה אחרונה
+========================================= */
+
+async function undoLast(id) {
+  const item = inventory.find(x => x.id === id);
+  const mv = item && item.movements[0];
+
+  if (!mv) {
+    return;
+  }
+
+  const isOut = mv.t === 'out';
+  const q = Number(mv.q) || 0;
+
+  if (!confirm(
+    'לבטל את ה' + (isOut ? 'הורדה' : 'הוספה') +
+    ' של ' + q + ' יח\' מ-' + shortDate(mv.d) + '?'
+  )) {
+    return;
+  }
+
+  const obj = {
+    movements: item.movements.slice(1),
+    last_date: now('ביטול ' + (isOut ? 'הורדה' : 'הוספה'))
+  };
+
+  if (isOut) {
+    obj.quantity = item.quantity + q;
+    obj.total_consumed = Math.max(0, item.totalConsumed - q);
+  } else {
+    if (item.quantity < q) {
+      alert('לא ניתן לבטל – הכמות הנוכחית קטנה מהכמות שנוספה');
+      return;
+    }
+    obj.quantity = item.quantity - q;
+    if (mv.p) {
+      obj.last_price = mv.p.last;
+      obj.prev_price = mv.p.prev;
+    }
+  }
+
+  const error = await updateRow(id, obj);
+
+  if (error) {
+    alert('שגיאה בביטול: ' + error.message);
     return;
   }
 
@@ -1189,6 +1604,25 @@ function render() {
         matchesCategory
       );
     });
+
+  buildMonthOptions();
+
+  let mUnits = 0, mCount = 0, mValue = 0;
+  inventory.forEach(item => {
+    item.movements.forEach(mv => {
+      if (mv.t === 'out' && monthKey(new Date(mv.d)) === selectedMonth) {
+        mUnits += Number(mv.q) || 0;
+        mCount++;
+        mValue += (Number(mv.q) || 0) *
+          Number(mv.pr ?? item.lastPrice ?? 0);
+      }
+    });
+  });
+  $('monthOutLabel').textContent = 'הורדות ' + monthPhrase(selectedMonth);
+  $('monthOutUnits').textContent = mUnits + ' יח\'';
+  $('monthOutMeta').textContent =
+    mCount + ' פעמים · ₪' +
+    mValue.toLocaleString('he-IL', { maximumFractionDigits: 2 });
 
   $('totalTypesCount').textContent =
     inventory.length;
@@ -1298,6 +1732,7 @@ function render() {
               <input
                 type="number"
                 id="edit_min_${item.id}"
+                min="0"
                 value="${item.minStock}"
               >
 
@@ -1414,6 +1849,18 @@ function render() {
 
           </div>
 
+          ${item.movements.length ? `
+            <button
+              type="button"
+              class="undo-btn"
+              onclick="undoLast(${item.id})"
+            >
+              ↩️ בטל פעולה אחרונה:
+              ${item.movements[0].t === 'out' ? 'הורדה' : 'הוספה'}
+              של ${Number(item.movements[0].q)} יח'
+              · ${esc(shortDate(item.movements[0].d))}
+            </button>` : ''}
+
           <div class="item-row">
             <span>מחיר יחידה נוכחי (₪):</span>
 
@@ -1421,6 +1868,7 @@ function render() {
               class="table-input"
               type="number"
               step="any"
+              min="0"
               value="${item.lastPrice}"
               onchange="updatePrice(${item.id},this.value)"
             >
@@ -1438,10 +1886,7 @@ function render() {
             </strong>
           </div>
 
-          <div class="history-box">
-            <span>📊 סה"כ שחרורים:</span>
-            <strong>${item.totalConsumed}</strong>
-          </div>
+          ${movementsHtml(item)}
 
           <div class="history-box">
             <span>🕒 פעילות אחרונה:</span>
@@ -1489,7 +1934,12 @@ function exportToExcel() {
     );
 
   let csv =
-    '\uFEFFמחסן,שם פריט,קטגוריה,כמות נוכחית,מינימום,מחיר נוכחי,מחיר קודם,סך הכל שחרורים,פעילות אחרונה\n';
+    '\uFEFFמחסן,שם פריט,קטגוריה,כמות נוכחית,מינימום,מחיר נוכחי,מחיר קודם,סך הכל שחרורים,' +
+    'הורדו ' + monthPhrase(selectedMonth) + ' (יחידות),' +
+    'מספר הורדות ' + monthPhrase(selectedMonth) + ',' +
+    'פעילות אחרונה\n';
+
+  const curMonth = selectedMonth;
 
   sortedInventory.forEach(item => {
     csv +=
@@ -1501,6 +1951,8 @@ function exportToExcel() {
       `${item.lastPrice},` +
       `${item.prevPrice},` +
       `${item.totalConsumed},` +
+      `${monthStats(item, curMonth).total},` +
+      `${monthStats(item, curMonth).count},` +
       `"${String(item.lastDate).replaceAll('"','""')}"\n`;
   });
 
@@ -1522,9 +1974,79 @@ function exportToExcel() {
   link.download =
     'inventory_report_by_warehouse.csv';
 
+  document.body.appendChild(link);
   link.click();
+  link.remove();
 
-  URL.revokeObjectURL(url);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+
+/* =========================================
+   דוח הורדות חודשי – שורה לכל הורדה
+========================================= */
+
+function csvCell(v) {
+  return '"' + String(v ?? '').replaceAll('"', '""') + '"';
+}
+
+function exportMonthlyReport() {
+  const rows = [];
+
+  inventory.forEach(item => {
+    item.movements.forEach(mv => {
+      if (mv.t === 'out' && monthKey(new Date(mv.d)) === selectedMonth) {
+        const price = Number(mv.pr ?? item.lastPrice ?? 0);
+        rows.push({ item, mv, price, date: new Date(mv.d) });
+      }
+    });
+  });
+
+  if (!rows.length) {
+    alert('אין הורדות ב' + monthTitle(selectedMonth));
+    return;
+  }
+
+  rows.sort((a, b) => a.date - b.date);
+
+  let csv = '\uFEFF' +
+    'תאריך,שעה,מחסן,שם פריט,קטגוריה,כמות שהורדה,נשארו במלאי,מחיר יחידה,שווי ההורדה\n';
+
+  let totalUnits = 0, totalValue = 0;
+
+  rows.forEach(({ item, mv, price, date }) => {
+    const q = Number(mv.q) || 0;
+    totalUnits += q;
+    totalValue += q * price;
+    csv += [
+      csvCell(date.toLocaleDateString('he-IL')),
+      csvCell(date.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })),
+      csvCell(item.warehouse),
+      csvCell(item.name),
+      csvCell(item.category),
+      q,
+      Number(mv.a),
+      price,
+      Math.round(q * price * 100) / 100
+    ].join(',') + '\n';
+  });
+
+  csv += [
+    csvCell('סה"כ ' + monthTitle(selectedMonth)),
+    '', '', csvCell(rows.length + ' הורדות'), '',
+    totalUnits, '', '',
+    Math.round(totalValue * 100) / 100
+  ].join(',') + '\n';
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'deductions_' + selectedMonth + '.csv';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 
@@ -1542,8 +2064,22 @@ $('addForm').addEventListener(
   addItem
 );
 
+$('lowStockModal').addEventListener('click', e => {
+  if (e.target === $('lowStockModal')) {
+    closeLowStockModal();
+  }
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeLowStockModal();
+  }
+});
+
 
 async function initApp() {
+  selectedMonth = monthKey(new Date());
+
   try {
     if (!window.supabase) {
       throw new Error(
